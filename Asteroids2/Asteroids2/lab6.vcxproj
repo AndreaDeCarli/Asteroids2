@@ -19,8 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Esercitazione6_S.cpp" />
     <ClCompile Include="gestione_curve_S.cpp" />
-    <ClCompile Include="gestione_interazioni.cpp" />
+    <ClCompile Include="gestione_interazioni_es6_S.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="Gui_S.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
@@ -30,16 +31,15 @@
     <ClCompile Include="imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
-    <ClCompile Include="inizializzazioni.cpp" />
+    <ClCompile Include="inizializzazioni_ese6.cpp" />
     <ClCompile Include="ShaderMaker.cpp" />
-    <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gestione_curve.h" />
-    <ClInclude Include="gestione_interazioni.h" />
+    <ClInclude Include="gestione_interazioni_ese6_S.h" />
     <ClInclude Include="Gui.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
@@ -50,7 +50,7 @@
     <ClInclude Include="imgui\imstb_rectpack.h" />
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
-    <ClInclude Include="inizializzazioni.h" />
+    <ClInclude Include="inizializzazioni_ese6.h" />
     <ClInclude Include="lib.h" />
     <ClInclude Include="ShaderMaker.h" />
     <ClInclude Include="strutture.h" />
@@ -58,8 +58,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{14f23ad2-82fd-4cac-b25d-df360e62e950}</ProjectGuid>
-    <RootNamespace>Asteroids2</RootNamespace>
+    <ProjectGuid>{432718f6-36df-4041-a23b-e9273ec32595}</ProjectGuid>
+    <RootNamespace>lab6</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -153,12 +153,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\dependencies_GL_GLFW\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\decar\Desktop\UNI\Terzo Anno\COMPUTER_GRAPHICS\dependencies_GL_GLFW\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\dependencies_GL_GLFW\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\decar\Desktop\UNI\Terzo Anno\COMPUTER_GRAPHICS\dependencies_GL_GLFW\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
