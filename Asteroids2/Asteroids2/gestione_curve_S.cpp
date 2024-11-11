@@ -64,7 +64,7 @@ float DY(int i, float* t, Curva* curva)
 
 }
 
-void InterpolazioneHermite(Curva* curva, vec4 color_top, vec4 color_bot)
+void InterpolazioneHermite(Curva* curva, vec4 color)
 {
 	
 	float tg,ampiezza,tm,x,y,step_t;
@@ -100,7 +100,7 @@ void InterpolazioneHermite(Curva* curva, vec4 color_top, vec4 color_bot)
 
 
 		curva->vertices.push_back(vec3(x,y,0.0)); 
-		curva->colors.push_back(vec4(1.0, 0.0, 0.0, 1.0));
+		curva->colors.push_back(color);
 		
 
 	}
@@ -108,11 +108,9 @@ void InterpolazioneHermite(Curva* curva, vec4 color_top, vec4 color_bot)
 	
 }
 
-void CostruisciHermite( Curva* curva)
+void CostruisciHermite( Curva* curva, vec4 color)
 {
 	curva->vertices.clear();
 	curva->colors.clear();
-	vec4 color_top = vec4(1.0, 0.0, 0.0, 1.0);
-	vec4 color_bot = vec4(0.0, 0.0, 1.0, 1.0);
-	InterpolazioneHermite(curva, color_top, color_bot);
+	InterpolazioneHermite(curva, color);
 }

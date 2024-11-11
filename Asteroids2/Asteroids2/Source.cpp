@@ -19,12 +19,12 @@ float r = 0.0, g = 0.0, b = 0.0;
 float alpha;
 int height = 1200, width = 1200;
 bool modTg;
-Curva player = {}, Derivata = {};//crea una nuova istanza della struttura curva di nome  "curva"
+Curva player = {};
 int selected_point = -1;
 int i, j;
 mat4 Projection;
 GLuint MatProj, MatModel, loc_flagP;
-float clear_color[3] = { 0.0, 0.0, 1.0 };
+float clear_color[3] = { 1.0, 1.0, 1.0 };
 float step_t;
 float Tens = 0.0, Bias = 0.0, Cont = 0.0;
 //----------------------------------------------------------------------------------------
@@ -117,7 +117,7 @@ int main(void)
     //Inizializzazione di un VAO per la curva, con un VBO inizializzato a NULL con un massimo di 100 posizioni, di tipi GL_DYNAMIC_DRAW
 
     init_player(&player);
-    CostruisciHermite(&player);
+    CostruisciHermite(&player, vec4(1.0, 1.0, 1.0, 1.0));
 
     INIT_VAO_DYNAMIC_Curva(&player);
 
@@ -126,31 +126,25 @@ int main(void)
     while (!glfwWindowShouldClose(window))
     {
 
-        /* Render here */
-        glClearColor(clear_color[0], clear_color[1], clear_color[2], 0.0);
+        glClearColor(0.0,0.0,0.0, 0.0);
         glClear(GL_COLOR_BUFFER_BIT);
         my_interface();
 
-
-
         glUniformMatrix4fv(MatProj, 1, GL_FALSE, value_ptr(Projection));
         player.Model = mat4(1.0);
-        //Le coordinate dei vertici della psezzta sono già nelle coordinate del mondo, quindi  curva.Model = mat4(1.0);
+        player.Model = scale(player.Model, vec3(0.1, 0.1, 1.0));
         glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(player.Model));
         
         glUniform1i(loc_flagP, 0);
-        
-        CostruisciHermite(&player);
+        glLineWidth(4.0);
+
+        CostruisciHermite(&player, vec4(clear_color[0],clear_color[1],clear_color[2], 0.0));
         INIT_VAO_DYNAMIC_Curva(&player);
 
         glBindVertexArray(player.VAO);
-        glDrawArrays(GL_LINE_STRIP, 0, player.vertices.size());  //curva con i vertici in ordine di inserimento
+        glDrawArrays(GL_LINE_STRIP, 0, player.vertices.size());
 
-        //Visualizzazione dei vertici come punti
         glBindVertexArray(0);
-
-        
-
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // Renderizza i dati di disegno di ImGui
 
@@ -176,8 +170,3 @@ int main(void)
 
     return 0;
 }
-
-
-
-
-
