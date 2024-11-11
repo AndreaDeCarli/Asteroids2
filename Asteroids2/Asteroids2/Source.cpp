@@ -14,9 +14,8 @@
 #define PI 3.14159265358979323
 //Variabili globali -------------------------------------------------------------------
 unsigned int programId;
-float r = 0.0, g = 0.2, b = 1.0;
+float r = 0.0, g = 0.0, b = 0.0;
 float alpha;
-double mousex, mousey;
 int height = 1200, width = 1200;
 int Mod;
 bool modTg;
@@ -27,7 +26,7 @@ int i, j;
 mat4 Projection;
 GLuint MatProj, MatModel, loc_flagP;
 bool visualizzaTg;
-float clear_color[3] = { 0.0,1.0,0.0 };
+float clear_color[3] = { 0.0,0.0,0.0 };
 float step_t;
 float Tens = 0.0, Bias = 0.0, Cont = 0.0;
 //----------------------------------------------------------------------------------------
@@ -67,7 +66,7 @@ int main(void)
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        std::cout << "Failde to load opengl function pointers !" << std::endl;
+        std::cout << "Failed to load opengl function pointers !" << std::endl;
         glfwTerminate();
         return -1;
     }
