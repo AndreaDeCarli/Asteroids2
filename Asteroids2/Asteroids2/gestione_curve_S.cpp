@@ -1,9 +1,7 @@
 #pragma once
 #include "strutture.h"
 extern float Tens, Bias, Cont;
-extern Curva Derivata, tangenti, curva;
-//extern bool visualizzaTg;
-extern float* t;
+extern Curva Derivata, tangenti, player;
 int pval = 200;
 extern bool  visualizzaTg;
 
@@ -40,37 +38,48 @@ float dy(int i, float* t, float Tens, float Bias, float Cont, Curva* curva)
 		return  0.5 * (1.0 - Tens) * (1.0 + Bias) * (1.0 - Cont) * (curva->CP.at(i).y - curva->CP.at(i - 1).y) / (t[i] - t[i - 1]) + 0.5 * (1 - Tens) * (1 - Bias) * (1 + Cont) * (curva->CP.at(i + 1).y - curva->CP.at(i).y) / (t[i + 1] - t[i]);
 }
 
-float DX(int i, float* t)
+float DX(int i, float* t, Curva* curva)
 {
 	//Nei vertici di controllo per i quali non sono stati modificati i parametri Tens, Bias, Cont il valore della derivata della componente x della curva è quello originale, altrimenti è quello che è stato modificato nella funzione 
 	//keyboardfunc  in seguito alla modifica dei valori Tens, Bias e Cont.
 
-	if (curva.Derivata.at(i).x == 0)
-		return dx(i, t,0.0,0.0,0.0, &curva);
-
-	if (curva.Derivata.at(i).x != 0)
-		return curva.Derivata.at(i).x;
+	if (curva->Derivata.at(i).x == 0)
+		return dx(i, t,0.0,0.0,0.0, curva);
+	
+	if (curva->Derivata.at(i).x != 0)
+		return curva->Derivata.at(i).x;
 
 }
 
-float DY(int i, float* t)
+float DY(int i, float* t, Curva* curva)
 {
 	// Nei vertici di controllo per i quali non sono stati modificati i parametri Tens, Bias, Cont il valore della derivata della componente y della curva è quello originale, altrimenti è quello che è stato modificato nella funzione
 		//keyboardfunc  in seguito alla modifica dei valori Tens, Bias e Cont.
 
-	if (curva.Derivata.at(i).y == 0)
-		return dy(i, t, 0.0, 0.0, 0.0, &curva);
+	if (curva->Derivata.at(i).y == 0)
+		return dy(i, t, 0.0, 0.0, 0.0, curva);
 
-	if (curva.Derivata.at(i).y != 0)
-		return curva.Derivata.at(i).y;
+	if (curva->Derivata.at(i).y != 0)
+		return curva->Derivata.at(i).y;
 
 }
 
-void InterpolazioneHermite(float* t, Curva* curva, vec4 color_top, vec4 color_bot)
+void InterpolazioneHermite(Curva* curva, vec4 color_top, vec4 color_bot)
 {
-	float tg,ampiezza,tm,x,y;
+	
+	float tg,ampiezza,tm,x,y,step_t;
+	float* t;
+	t = new float[curva->CP.size()];
+	step_t = 1.0 / (curva->CP.size() - 1);
+	for (int i = 0; i < curva->CP.size(); i++)
+		t[i] = (float)i * step_t;
+
+	t[curva->CP.size()] = 1.0;
+
 	float stepTg = 1.0 / (float)(pval - 1);
 	int is = 0;
+
+	
 
 	for ( tg = 0; tg <= 1; tg+=stepTg)
 	{
@@ -84,17 +93,19 @@ void InterpolazioneHermite(float* t, Curva* curva, vec4 color_top, vec4 color_bo
 		//ampiezza dell'intervallo [t[is],t[is+1]] = t[is+1] - t[is]
 
 		//valuto PH_x(t) = PHI_[is](tm) = x_[is]*PHI0(tm)+x[is+1]*PSI0(tm)+dx[is]*PHI1(tm)*ampiezza + dx[is+1]*PHI1(tm)*ampiezza
-		x = curva->CP[is].x * PHI0(tm) + curva->CP[is + 1].x * PSI0(tm) + DX(is, t) * PHI1(tm) * ampiezza + DX(is + 1, t) * PSI1(tm) * ampiezza;
+		x = curva->CP[is].x * PHI0(tm) + curva->CP[is + 1].x * PSI0(tm) + DX(is, t, curva) * PHI1(tm) * ampiezza + DX(is + 1, t, curva) * PSI1(tm) * ampiezza;
 
 		//valuto PH_y(t) = PHI_[is](tm) = y_[is]*PHI0(tm)+y[is+1]*PSI0(tm)+dy[is]*PHI1(tm)*ampiezza + dy[is+1]*PHI1(tm)*ampiezza
-		y = curva->CP[is].y * PHI0(tm) + curva->CP[is + 1].y * PSI0(tm) + DY(is, t) * PHI1(tm) * ampiezza + DY(is + 1, t) * PSI1(tm) * ampiezza;
+		y = curva->CP[is].y * PHI0(tm) + curva->CP[is + 1].y * PSI0(tm) + DY(is, t, curva) * PHI1(tm) * ampiezza + DY(is + 1, t, curva) * PSI1(tm) * ampiezza;
 
 
-		curva->vertices.push_back(vec3(x,y,0.0));
-		curva->colors.push_back(color_top);
-		curva->nv = curva->vertices.size();
+		curva->vertices.push_back(vec3(x,y,0.0)); 
+		curva->colors.push_back(vec4(1.0, 0.0, 0.0, 1.0));
+		
 
 	}
+	curva->nv = curva->vertices.size();
+	
 }
 
 void CostruisciHermite( Curva* curva)
@@ -102,6 +113,6 @@ void CostruisciHermite( Curva* curva)
 	curva->vertices.clear();
 	curva->colors.clear();
 	vec4 color_top = vec4(1.0, 0.0, 0.0, 1.0);
-	vec4 color_bot = vec4(1.0, 0.0, 0.0, 1.0);
-	InterpolazioneHermite(t, curva, color_top, color_bot);
+	vec4 color_bot = vec4(0.0, 0.0, 1.0, 1.0);
+	InterpolazioneHermite(curva, color_top, color_bot);
 }

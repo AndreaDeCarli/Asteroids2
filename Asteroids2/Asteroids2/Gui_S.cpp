@@ -45,18 +45,8 @@ void my_interface( )
         // Create a window for color settings
         ImGui::Begin("Impostazioni");
         
-        ImGui::ColorEdit4("Colore di Sfondo",clear_color);
+        ImGui::ColorEdit4("Colore di Sfondo", clear_color);
         
-        ImGui::RadioButton("Inserimento", &Mod, 0); ImGui::SameLine();
-        ImGui::RadioButton("Modifica", &Mod, 1); ImGui::SameLine();
-        ImGui::RadioButton("Elimina", &Mod, 2);
-       
-
-       
-        if (Mod ==0)
-            selected_point = -1;
-
-      
 
         ImGui::End(); // Termina la finestra
 

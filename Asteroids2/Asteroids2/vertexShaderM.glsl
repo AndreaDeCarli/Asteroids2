@@ -17,11 +17,11 @@ void main()
 //per la matrice Projection)
     if (flagP==1){
         gl_Position = Projection*Model*vec4(aPos_CP, 1.0);
-        ourColor = aColor; // set ourColor to the input color we got from the vertex data
+        ourColor = aColor_CP; // set ourColor to the input color we got from the vertex data
     }
     if (flagP == 0) {
         gl_Position = Projection * Model * vec4(aPos, 1.0);
-        ourColor = aColor_CP; // set ourColor to the input color we got from the vertex data
+        ourColor = aColor; // set ourColor to the input color we got from the vertex data
     }
     if (flagP == 2) {
         gl_Position = Projection * Model * vec4(tg_CP, 1.0);

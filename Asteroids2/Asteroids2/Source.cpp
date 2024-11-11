@@ -5,6 +5,7 @@
 #include "inizializzazioni.h"
 #include "gestione_curve.h"
 #include "gestione_interazioni.h"
+#include "geometria.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
@@ -17,16 +18,13 @@ unsigned int programId;
 float r = 0.0, g = 0.0, b = 0.0;
 float alpha;
 int height = 1200, width = 1200;
-int Mod;
 bool modTg;
-float* t;
-Curva curva = {}, Derivata = {};//crea una nuova istanza della struttura curva di nome  "curva"
+Curva player = {}, Derivata = {};//crea una nuova istanza della struttura curva di nome  "curva"
 int selected_point = -1;
 int i, j;
 mat4 Projection;
 GLuint MatProj, MatModel, loc_flagP;
-bool visualizzaTg;
-float clear_color[3] = { 0.0,0.0,0.0 };
+float clear_color[3] = { 0.0, 0.0, 1.0 };
 float step_t;
 float Tens = 0.0, Bias = 0.0, Cont = 0.0;
 //----------------------------------------------------------------------------------------
@@ -118,11 +116,10 @@ int main(void)
 
     //Inizializzazione di un VAO per la curva, con un VBO inizializzato a NULL con un massimo di 100 posizioni, di tipi GL_DYNAMIC_DRAW
 
-    curva.ncp = 100;
-    curva.nv = 200;
-    curva.ntg = 200;
+    init_player(&player);
+    CostruisciHermite(&player);
 
-    INIT_VAO_DYNAMIC_Curva(&curva);
+    INIT_VAO_DYNAMIC_Curva(&player);
 
     Initialize_IMGUI(window);
 
@@ -130,50 +127,29 @@ int main(void)
     {
 
         /* Render here */
-        glClearColor(clear_color[0], clear_color[1], clear_color[3], 1.0);
+        glClearColor(clear_color[0], clear_color[1], clear_color[2], 0.0);
         glClear(GL_COLOR_BUFFER_BIT);
         my_interface();
 
 
 
         glUniformMatrix4fv(MatProj, 1, GL_FALSE, value_ptr(Projection));
-        curva.Model = mat4(1.0);
+        player.Model = mat4(1.0);
         //Le coordinate dei vertici della psezzta sono già nelle coordinate del mondo, quindi  curva.Model = mat4(1.0);
-        glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(curva.Model));
-        glUniform1i(loc_flagP, 1);
-        glPointSize(4.0);
-        glLineWidth(2.0);
-        glUseProgram(programId);
-        glBindVertexArray(curva.VAO);
-        glDrawArrays(GL_LINE_STRIP, 0, curva.CP.size());  //curva con i vertici in ordine di inserimento
-        glDrawArrays(GL_POINTS, 0, curva.CP.size());
+        glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(player.Model));
+        
+        glUniform1i(loc_flagP, 0);
+        
+        CostruisciHermite(&player);
+        INIT_VAO_DYNAMIC_Curva(&player);
+
+        glBindVertexArray(player.VAO);
+        glDrawArrays(GL_LINE_STRIP, 0, player.vertices.size());  //curva con i vertici in ordine di inserimento
+
         //Visualizzazione dei vertici come punti
         glBindVertexArray(0);
 
-        if (curva.CP.size() > 2)
-        {
-            t = new float[curva.CP.size()];
-            step_t = 1.0 / (curva.CP.size() - 1);
-            for (i = 0; i < curva.CP.size(); i++)
-                t[i] = (float)i * step_t;
-            t[curva.CP.size()] = 1.0;
-            CostruisciHermite(&curva);
-            UPDATE_VAO_Curva(&curva);
-
-            glUniform1i(loc_flagP, 0);
-            glBindVertexArray(curva.VAO);
-            glDrawArrays(GL_LINE_STRIP, 0, curva.vertices.size());  //curva con i vertici in ordine di inserimento
-
-            //Visualizzazione dei vertici come punti
-            glBindVertexArray(0);
-
-            if (visualizzaTg == 1)
-            {
-                glUniform1i(loc_flagP, 2);
-                glBindVertexArray(curva.VAO);
-                glDrawArrays(GL_LINES, 0, curva.tg.size());  //curva con i vertici in ordine di inserimento
-            }
-        }
+        
 
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // Renderizza i dati di disegno di ImGui
@@ -190,9 +166,9 @@ int main(void)
     glDeleteProgram(programId);
 
 
-    glDeleteBuffers(1, &curva.VBO_vertices);
-    glDeleteBuffers(1, &curva.VBO_colors);
-    glDeleteVertexArrays(1, &curva.VAO);
+    glDeleteBuffers(1, &player.VBO_vertices);
+    glDeleteBuffers(1, &player.VBO_colors);
+    glDeleteVertexArrays(1, &player.VAO);
 
 
     glfwTerminate();

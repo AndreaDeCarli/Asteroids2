@@ -33,11 +33,13 @@
     <ClCompile Include="inizializzazioni.cpp" />
     <ClCompile Include="ShaderMaker.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="geometria.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="geometria.h" />
     <ClInclude Include="gestione_curve.h" />
     <ClInclude Include="gestione_interazioni.h" />
     <ClInclude Include="Gui.h" />

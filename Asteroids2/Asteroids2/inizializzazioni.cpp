@@ -21,6 +21,8 @@ void INIT_SHADER(void)
 
     programId = ShaderMaker::createProgram(vertexShader, fragmentShader);
 
+
+    glUseProgram(programId);
 }
 
 void INIT_VAO_DYNAMIC_Curva(Curva* fig)
@@ -32,7 +34,7 @@ void INIT_VAO_DYNAMIC_Curva(Curva* fig)
     //Genero , rendo attivo, riempio il VBO della geometria dei vertici di COntrollo
     glGenBuffers(1, &fig->VBO_vertices);
     glBindBuffer(GL_ARRAY_BUFFER, fig->VBO_vertices);
-    glBufferData(GL_ARRAY_BUFFER, fig->nv * sizeof(vec3), NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, fig->nv * sizeof(vec3), fig->vertices.data(), GL_DYNAMIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
     glEnableVertexAttribArray(0);
@@ -40,43 +42,12 @@ void INIT_VAO_DYNAMIC_Curva(Curva* fig)
     //Genero , rendo attivo, riempio il VBO dei colori nei vertici di controllo
     glGenBuffers(1, &fig->VBO_colors);
     glBindBuffer(GL_ARRAY_BUFFER, fig->VBO_colors);
-    glBufferData(GL_ARRAY_BUFFER, fig->nv * sizeof(vec4), NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, fig->nv * sizeof(vec4), fig->colors.data(), GL_DYNAMIC_DRAW);
     //Adesso carico il VBO dei colori nel layer 2
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
     glEnableVertexAttribArray(1);
      
 
-    //Genero , rendo attivo, riempio il VBO della geometria dei vertici di COntrollo
-    glGenBuffers(1, &fig->VBO_CP);
-    glBindBuffer(GL_ARRAY_BUFFER, fig->VBO_CP);
-    glBufferData(GL_ARRAY_BUFFER, fig->ncp * sizeof(vec3), NULL, GL_DYNAMIC_DRAW);
-
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glEnableVertexAttribArray(2);
-
-    //Genero , rendo attivo, riempio il VBO dei colori nei vertici di controllo
-    glGenBuffers(1, &fig->VBO_CP_colors);
-    glBindBuffer(GL_ARRAY_BUFFER, fig->VBO_CP_colors);
-    glBufferData(GL_ARRAY_BUFFER, fig->ncp * sizeof(vec4), NULL, GL_DYNAMIC_DRAW);
-    //Adesso carico il VBO dei colori nel layer 2
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glEnableVertexAttribArray(3);
-    
-    //Genero , rendo attivo, riempio il VBO della geometria dei vertici di COntrollo
-    glGenBuffers(1, &fig->VBO_TG);
-    glBindBuffer(GL_ARRAY_BUFFER, fig->VBO_TG);
-    glBufferData(GL_ARRAY_BUFFER, fig->ntg * sizeof(vec3), NULL, GL_DYNAMIC_DRAW);
-
-    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glEnableVertexAttribArray(4);
-
-    //Genero , rendo attivo, riempio il VBO dei colori nei vertici di controllo
-    glGenBuffers(1, &fig->VBO_TG_colors);
-    glBindBuffer(GL_ARRAY_BUFFER, fig->VBO_TG_colors);
-    glBufferData(GL_ARRAY_BUFFER, fig->ntg * sizeof(vec4), NULL, GL_DYNAMIC_DRAW);
-    //Adesso carico il VBO dei colori nel layer 2
-    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glEnableVertexAttribArray(5);
 
     
 }
@@ -101,33 +72,5 @@ void UPDATE_VAO_Curva(Curva* fig)
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
     glEnableVertexAttribArray(1);
      
-
-
-    glBindBuffer(GL_ARRAY_BUFFER, fig->VBO_CP);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, fig->CP.size() * sizeof(vec3), fig->CP.data());
-
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glEnableVertexAttribArray(2);
-
-    //Genero , rendo attivo, riempio il VBO dei colori nei vertici di controllo
-    glBindBuffer(GL_ARRAY_BUFFER, fig->VBO_CP_colors);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, fig->colCP.size() * sizeof(vec4), fig->colCP.data());
-    //Adesso carico il VBO dei colori nel layer 2
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glEnableVertexAttribArray(3);
-    
-    glBindBuffer(GL_ARRAY_BUFFER, fig->VBO_TG);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, fig->tg.size() * sizeof(vec3), fig->tg.data());
-
-    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glEnableVertexAttribArray(4);
-
-    //Genero , rendo attivo, riempio il VBO dei colori nei vertici di controllo
-    glBindBuffer(GL_ARRAY_BUFFER, fig->VBO_TG_colors);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, fig->col_tg.size() * sizeof(vec4), fig->col_tg.data());
-    //Adesso carico il VBO dei colori nel layer 2
-    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glEnableVertexAttribArray(5);
-    
 }
 
