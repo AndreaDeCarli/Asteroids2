@@ -85,3 +85,13 @@ void init_player_actor(Actor* player) {
     init_player_shape(player->shape);
 }
 
+void init_background_actor(Actor* background) {
+    background->velocity = 0.0;
+    background->direction = 0.0;
+    background->position.x = 0.0;
+    background->position.y = 0.0;
+
+    background->shape = new Shape;
+    init_background_shape(background->shape);
+}
+

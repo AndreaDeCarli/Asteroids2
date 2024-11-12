@@ -17,14 +17,14 @@
 unsigned int programId;
 float r = 0.0, g = 0.0, b = 0.0;
 float alpha;
-int height = 1200, width = 1200;
-Actor player = {};
+int height = 800, width = 800;
+Actor player = {}, background = {};
 int i, j;
 mat4 Projection;
 GLuint MatProj, MatModel, loc_flagP, GameColor;
 float clear_color[3] = { 1.0, 1.0, 1.0 };
 float step_t;
-bool acc;
+bool acc = false, TURN_LEFT = false, TURN_RIGHT = false;
 const double fpsLimit = 1.0 / 60.0;
 double lastUpdateTime = 0;  // number of seconds since the last loop
 double lastFrameTime = 0;   // number of seconds since the last frame
@@ -120,9 +120,10 @@ int main(void)
     //Inizializzazione di un VAO per la curva, con un VBO inizializzato a NULL con un massimo di 100 posizioni, di tipi GL_DYNAMIC_DRAW
 
     init_player_actor(&player);
-
+    init_background_actor(&background);
 
     INIT_VAO_DYNAMIC_Curva(player.shape);
+    INIT_VAO_DYNAMIC_Curva(background.shape);
 
     Initialize_IMGUI(window);
 
@@ -150,6 +151,13 @@ int main(void)
                 player.velocity = 0;
             }
 
+            if (TURN_LEFT) {
+                player.direction += 2 * PI * 0.005;
+            }
+            if (TURN_RIGHT) {
+                player.direction -= 2 * PI * 0.005;
+            }
+
             
 
             player.position.x +=  (player.velocity * cos(player.direction));
@@ -174,12 +182,10 @@ int main(void)
             glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(player.shape->Model));
             glUniform1i(loc_flagP, 0);
             glUniform4fv(GameColor,1, value_ptr(vec4(clear_color[0], clear_color[1], clear_color[2], 0.0)));
-            glLineWidth(4.0);
-
-            INIT_VAO_DYNAMIC_Curva(player.shape);
+            glLineWidth(2.0);
 
             glBindVertexArray(player.shape->VAO);
-            glDrawArrays(GL_LINE_STRIP, 0, player.shape->vertices.size());
+            glDrawArrays(player.shape->render, 0, player.shape->vertices.size());
             glBindVertexArray(0);
 
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // Renderizza i dati di disegno di ImGui

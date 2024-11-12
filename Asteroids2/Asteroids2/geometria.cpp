@@ -36,3 +36,19 @@ void init_player_shape(Shape* player) {
 	player->render = GL_LINE_STRIP;
 }
 
+
+void init_background_shape(Shape* background) {
+
+	background->vertices.push_back(vec3(-1.0,1.0, 0.0));
+	background->colors.push_back(vec4(0.0, 0.0, 0.0, 1.0));
+	background->vertices.push_back(vec3(1.0, 1.0, 0.0));
+	background->colors.push_back(vec4(0.0, 0.0, 0.0, 1.0));
+	background->vertices.push_back(vec3(1.0, -1.0, 0.0));
+	background->colors.push_back(vec4(0.0, 0.0, 0.0, 1.0));
+	background->vertices.push_back(vec3(-1.0, -1.0, 0.0));
+	background->colors.push_back(vec4(0.0, 0.0, 0.0, 1.0));
+
+	background->nv = 4;
+	background->render = GL_TRIANGLES;
+}
+
