@@ -1,11 +1,6 @@
 #pragma once
 #include "strutture.h"
-extern float Tens, Bias, Cont;
-extern Curva Derivata, tangenti, player;
-int pval = 200;
-extern bool  visualizzaTg;
 
-/// /////////////////////////////////// Disegna geometria //////////////////////////////////////
 //Per Curve di hermite
 #define PHI0(t)  (2.0*t*t*t-3.0*t*t+1)
 #define PHI1(t)  (t*t*t-2.0*t*t+t)
@@ -13,7 +8,7 @@ extern bool  visualizzaTg;
 #define PSI1(t)  (t*t*t-t*t)
 
 
-float dx(int i, float* t, float Tens, float Bias, float Cont, Curva* curva)
+float dx(int i, float* t, float Tens, float Bias, float Cont, Shape* curva)
 {
 	if (i == 0)
 		return  0.5 * (1.0 - Tens) * (1.0 - Bias) * (1.0 - Cont) * (curva->CP[i + 1].x - curva->CP[i].x) / (t[i + 1] - t[i]);
@@ -25,7 +20,7 @@ float dx(int i, float* t, float Tens, float Bias, float Cont, Curva* curva)
 	else
 		return  0.5 * (1.0 - Tens) * (1.0 + Bias) * (1.0 - Cont) * (curva->CP.at(i).x - curva->CP.at(i - 1).x) / (t[i] - t[i - 1]) + 0.5 * (1 - Tens) * (1 - Bias) * (1 + Cont) * (curva->CP.at(i + 1).x - curva->CP.at(i).x) / (t[i + 1] - t[i]);
 }
-float dy(int i, float* t, float Tens, float Bias, float Cont, Curva* curva)
+float dy(int i, float* t, float Tens, float Bias, float Cont, Shape* curva)
 {
 	if (i == 0)
 		return 0.5 * (1.0 - Tens) * (1.0 - Bias) * (1.0 - Cont) * (curva->CP.at(i + 1).y - curva->CP.at(i).y) / (t[i + 1] - t[i]);
@@ -38,7 +33,7 @@ float dy(int i, float* t, float Tens, float Bias, float Cont, Curva* curva)
 		return  0.5 * (1.0 - Tens) * (1.0 + Bias) * (1.0 - Cont) * (curva->CP.at(i).y - curva->CP.at(i - 1).y) / (t[i] - t[i - 1]) + 0.5 * (1 - Tens) * (1 - Bias) * (1 + Cont) * (curva->CP.at(i + 1).y - curva->CP.at(i).y) / (t[i + 1] - t[i]);
 }
 
-float DX(int i, float* t, Curva* curva)
+float DX(int i, float* t, Shape* curva)
 {
 	//Nei vertici di controllo per i quali non sono stati modificati i parametri Tens, Bias, Cont il valore della derivata della componente x della curva è quello originale, altrimenti è quello che è stato modificato nella funzione 
 	//keyboardfunc  in seguito alla modifica dei valori Tens, Bias e Cont.
@@ -51,7 +46,7 @@ float DX(int i, float* t, Curva* curva)
 
 }
 
-float DY(int i, float* t, Curva* curva)
+float DY(int i, float* t, Shape* curva)
 {
 	// Nei vertici di controllo per i quali non sono stati modificati i parametri Tens, Bias, Cont il valore della derivata della componente y della curva è quello originale, altrimenti è quello che è stato modificato nella funzione
 		//keyboardfunc  in seguito alla modifica dei valori Tens, Bias e Cont.
@@ -64,7 +59,7 @@ float DY(int i, float* t, Curva* curva)
 
 }
 
-void InterpolazioneHermite(Curva* curva, vec4 color)
+void InterpolazioneHermite(Shape* curva, vec4 color)
 {
 	
 	float tg,ampiezza,tm,x,y,step_t;
@@ -76,7 +71,7 @@ void InterpolazioneHermite(Curva* curva, vec4 color)
 
 	t[curva->CP.size()] = 1.0;
 
-	float stepTg = 1.0 / (float)(pval - 1);
+	float stepTg = 1.0 / (float)(curva->nv - 1);
 	int is = 0;
 
 	
@@ -104,11 +99,10 @@ void InterpolazioneHermite(Curva* curva, vec4 color)
 		
 
 	}
-	curva->nv = curva->vertices.size();
 	
 }
 
-void CostruisciHermite( Curva* curva, vec4 color)
+void CostruisciHermite( Shape* curva, vec4 color)
 {
 	curva->vertices.clear();
 	curva->colors.clear();

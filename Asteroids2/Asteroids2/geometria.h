@@ -1,6 +1,6 @@
 #pragma once
 #include "strutture.h"
 
-void init_player(Curva* player);
-void init_projectile();
-void init_asteroid();
+void init_player_shape(Shape* player);
+void init_projectile(Shape* projectile);
+void init_asteroid(Shape* asteroid);

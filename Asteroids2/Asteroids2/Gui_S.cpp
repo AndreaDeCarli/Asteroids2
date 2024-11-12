@@ -14,9 +14,10 @@ extern int  nClouds;
  extern float clear_color[3];
  extern int Mod, selected_point;
  extern bool visualizzaTg, modTg;
- extern Curva curva;
+ extern Shape curva;
  extern float* t;
  extern float Tens, Bias, Cont;
+ extern Actor player;
 //bool my_tool_active = true;
 void Initialize_IMGUI(GLFWwindow* window){
 
@@ -45,8 +46,7 @@ void my_interface( )
         // Create a window for color settings
         ImGui::Begin("Impostazioni");
         
-        ImGui::ColorEdit4("Colore di Sfondo", clear_color);
-        
+        ImGui::ColorEdit4("Colore", clear_color);        
 
         ImGui::End(); // Termina la finestra
 

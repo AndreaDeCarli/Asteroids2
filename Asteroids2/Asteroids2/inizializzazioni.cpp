@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 #include "ShaderMaker.h"
 #include "strutture.h"
+#include "geometria.h"
 
 extern unsigned int programId;
 
@@ -25,7 +26,7 @@ void INIT_SHADER(void)
     glUseProgram(programId);
 }
 
-void INIT_VAO_DYNAMIC_Curva(Curva* fig)
+void INIT_VAO_DYNAMIC_Curva(Shape* fig)
 {
 
     glGenVertexArrays(1, &fig->VAO);
@@ -51,7 +52,7 @@ void INIT_VAO_DYNAMIC_Curva(Curva* fig)
 
     
 }
-void UPDATE_VAO_Curva(Curva* fig)
+void UPDATE_VAO_Curva(Shape* fig)
 {
 
    
@@ -72,5 +73,15 @@ void UPDATE_VAO_Curva(Curva* fig)
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
     glEnableVertexAttribArray(1);
      
+}
+
+
+void init_player_actor(Actor* player) {
+    player->velocity = 0.0;
+    player->direction = 0.0;
+    player->position.x = 0.0;
+    player->position.y = 0.0;
+    player->shape = new Shape;
+    init_player_shape(player->shape);
 }
 

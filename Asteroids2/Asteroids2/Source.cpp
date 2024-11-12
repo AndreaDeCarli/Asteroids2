@@ -18,15 +18,17 @@ unsigned int programId;
 float r = 0.0, g = 0.0, b = 0.0;
 float alpha;
 int height = 1200, width = 1200;
-bool modTg;
-Curva player = {};
-int selected_point = -1;
+Actor player = {};
 int i, j;
 mat4 Projection;
 GLuint MatProj, MatModel, loc_flagP;
 float clear_color[3] = { 1.0, 1.0, 1.0 };
 float step_t;
-float Tens = 0.0, Bias = 0.0, Cont = 0.0;
+bool acc;
+const double fpsLimit = 1.0 / 60.0;
+double lastUpdateTime = 0;  // number of seconds since the last loop
+double lastFrameTime = 0;   // number of seconds since the last frame
+
 //----------------------------------------------------------------------------------------
 
 int main(void)
@@ -116,53 +118,90 @@ int main(void)
 
     //Inizializzazione di un VAO per la curva, con un VBO inizializzato a NULL con un massimo di 100 posizioni, di tipi GL_DYNAMIC_DRAW
 
-    init_player(&player);
-    CostruisciHermite(&player, vec4(1.0, 1.0, 1.0, 1.0));
+    init_player_actor(&player);
 
-    INIT_VAO_DYNAMIC_Curva(&player);
+
+    INIT_VAO_DYNAMIC_Curva(player.shape);
 
     Initialize_IMGUI(window);
 
     while (!glfwWindowShouldClose(window))
     {
 
-        glClearColor(0.0,0.0,0.0, 0.0);
-        glClear(GL_COLOR_BUFFER_BIT);
-        my_interface();
 
-        glUniformMatrix4fv(MatProj, 1, GL_FALSE, value_ptr(Projection));
-        player.Model = mat4(1.0);
-        player.Model = scale(player.Model, vec3(0.1, 0.1, 1.0));
-        glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(player.Model));
-        
-        glUniform1i(loc_flagP, 0);
-        glLineWidth(4.0);
+        double now = glfwGetTime();
+        double deltaTime = now - lastUpdateTime;
 
-        CostruisciHermite(&player, vec4(clear_color[0],clear_color[1],clear_color[2], 0.0));
-        INIT_VAO_DYNAMIC_Curva(&player);
-
-        glBindVertexArray(player.VAO);
-        glDrawArrays(GL_LINE_STRIP, 0, player.vertices.size());
-
-        glBindVertexArray(0);
-
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // Renderizza i dati di disegno di ImGui
-
-
-        glfwSwapBuffers(window);
-
-        /* Poll for and process events */
         glfwPollEvents();
+
+        
+        
+        if ((now - lastFrameTime) >= fpsLimit)
+        {
+
+            if (acc) {
+                player.velocity += 0.005;
+            }
+            else if (player.velocity > 0) {
+                player.velocity -= 0.004;
+            }
+            if (player.velocity < 0) {
+                player.velocity = 0;
+            }
+
+            
+
+            player.position.x +=  (player.velocity * cos(player.direction));
+            player.position.y +=  (player.velocity * sin(player.direction));
+
+
+            glClearColor(0.0, 0.0, 0.0, 0.0);
+            glClear(GL_COLOR_BUFFER_BIT);
+            my_interface();
+
+            glUniformMatrix4fv(MatProj, 1, GL_FALSE, value_ptr(Projection));
+            player.shape->Model = mat4(1.0);
+
+            player.shape->Model = scale(player.shape->Model, vec3(0.05, 0.05, 1.0));
+           
+            player.shape->Model = translate(player.shape->Model, vec3(
+                player.position.x,
+                player.position.y,
+                0.0));
+
+            player.shape->Model = rotate(player.shape->Model, player.direction-(float)PI/2 ,vec3(0.0, 0.0, 1.0));
+            
+            
+            glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(player.shape->Model));
+            glUniform1i(loc_flagP, 0);
+            glLineWidth(4.0);
+
+
+            glBindVertexArray(player.shape->VAO);
+            glDrawArrays(GL_LINE_STRIP, 0, player.shape->vertices.size());
+            glBindVertexArray(0);
+
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // Renderizza i dati di disegno di ImGui
+            glfwSwapBuffers(window);
+
+            std::cout << player.position.x << " - " << player.position.y << std::endl;
+
+            // only set lastFrameTime when you actually draw something
+            lastFrameTime = now;
+        }
+
+        // set lastUpdateTime every iteration
+        lastUpdateTime = now;
     }
 
     close_GUI();
 
     glDeleteProgram(programId);
+    
 
-
-    glDeleteBuffers(1, &player.VBO_vertices);
-    glDeleteBuffers(1, &player.VBO_colors);
-    glDeleteVertexArrays(1, &player.VAO);
+    glDeleteBuffers(1, &player.shape->VBO_vertices);
+    glDeleteBuffers(1, &player.shape->VBO_colors);
+    glDeleteVertexArrays(1, &player.shape->VAO);
 
 
     glfwTerminate();

@@ -12,16 +12,14 @@
 #include "imgui/imgui_impl_opengl3.h"
 #include "Gui.h"
 
+#define PI 3.14159265358979323
+
 extern GLFWwindow* window;
-extern Curva curva, Derivata;
-extern float Tens, Bias, Cont;
 extern float r, g, b;
 extern double mousex,mousey;
 extern int height, width;
-extern int Mod;
-extern bool modTg;
-extern int selected_point;
-extern float* t;
+extern bool acc;
+extern Actor player;
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
     
 }
@@ -40,6 +38,22 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
                 //Imposta a True il flag booleano di chiusura della finestr
                 glfwSetWindowShouldClose(window, GLFW_TRUE);
             break;
+
+
+        case GLFW_KEY_W:
+            if (action == GLFW_PRESS) {
+                acc = true;
+            }
+            else if (action == GLFW_RELEASE) {
+                acc = false;
+            }
+            break;
+        case GLFW_KEY_A:
+            player.direction += 2 * PI * 0.01;
+            break;
+        case GLFW_KEY_D:
+            player.direction -= 2 * PI * 0.01;
+            break;
         default:
 
             break;
@@ -54,8 +68,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
 void framebuffer_size_callback(GLFWwindow* window, int w, int h)
 {
-
-    
 
     
 }
