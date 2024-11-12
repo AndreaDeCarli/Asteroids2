@@ -6,10 +6,11 @@ out vec4 ourColor; // output a color to the fragment shader
 uniform mat4 Projection;  //vARIABILE DI TIPO uniform, rimane la stessa per ogni vertice della primitiva e viene passata dall'esterno
 uniform mat4 Model;
 uniform int flagP;
+uniform vec4 GameColor;
 void main(){
     if (flagP == 0) {
         gl_Position = Projection * Model * vec4(aPos, 1.0);
-        ourColor = aColor; // set ourColor to the input color we got from the vertex data
+        ourColor = GameColor; // set ourColor to the input color we got from the vertex data
     }
 }  
 

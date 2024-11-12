@@ -21,7 +21,7 @@ int height = 1200, width = 1200;
 Actor player = {};
 int i, j;
 mat4 Projection;
-GLuint MatProj, MatModel, loc_flagP;
+GLuint MatProj, MatModel, loc_flagP, GameColor;
 float clear_color[3] = { 1.0, 1.0, 1.0 };
 float step_t;
 bool acc;
@@ -112,6 +112,7 @@ int main(void)
 
     MatProj = glGetUniformLocation(programId, "Projection");
     MatModel = glGetUniformLocation(programId, "Model");
+    GameColor = glGetUniformLocation(programId, "GameColor");
     loc_flagP = glGetUniformLocation(programId, "flagP");
 
     /* Loop until the user closes the window */
@@ -163,19 +164,19 @@ int main(void)
             player.shape->Model = mat4(1.0);
 
             player.shape->Model = scale(player.shape->Model, vec3(0.05, 0.05, 1.0));
-           
             player.shape->Model = translate(player.shape->Model, vec3(
                 player.position.x,
                 player.position.y,
                 0.0));
-
             player.shape->Model = rotate(player.shape->Model, player.direction-(float)PI/2 ,vec3(0.0, 0.0, 1.0));
             
             
             glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(player.shape->Model));
             glUniform1i(loc_flagP, 0);
+            glUniform4fv(GameColor,1, value_ptr(vec4(clear_color[0], clear_color[1], clear_color[2], 0.0)));
             glLineWidth(4.0);
 
+            INIT_VAO_DYNAMIC_Curva(player.shape);
 
             glBindVertexArray(player.shape->VAO);
             glDrawArrays(GL_LINE_STRIP, 0, player.shape->vertices.size());
@@ -183,8 +184,6 @@ int main(void)
 
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // Renderizza i dati di disegno di ImGui
             glfwSwapBuffers(window);
-
-            std::cout << player.position.x << " - " << player.position.y << std::endl;
 
             // only set lastFrameTime when you actually draw something
             lastFrameTime = now;
