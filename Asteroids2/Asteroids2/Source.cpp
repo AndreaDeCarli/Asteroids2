@@ -19,6 +19,7 @@ float r = 0.0, g = 0.0, b = 0.0;
 float alpha;
 int height = 1000, width = 1000;
 Actor player = {}, background = {};
+Actor Asteroids[100] = {};
 int i, j;
 mat4 Projection;
 GLuint MatProj, MatModel, loc_flagP, GameColor, vec_resS, loc_time;
@@ -207,6 +208,19 @@ int main(void)
             glBindVertexArray(player.shape->VAO);
             glDrawArrays(player.shape->render, 0, player.shape->vertices.size());
             glBindVertexArray(0);
+
+            if (player.position.x < -20.0) {
+                player.position.x = 20.0;
+            }
+            else if (player.position.x > 20.0) {
+                player.position.x = -20.0;
+            }
+            if (player.position.y < -20.0) {
+                player.position.y = 20.0;
+            }
+            else if (player.position.y > 20.0) {
+                player.position.y = -20.0;
+            }
 
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // Renderizza i dati di disegno di ImGui
             glfwSwapBuffers(window);
