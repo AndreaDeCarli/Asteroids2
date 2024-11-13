@@ -13,4 +13,5 @@ void UPDATE_VAO_Curva(Shape* fig);
 
 void init_player_actor(Actor* player);
 void init_background_actor(Actor* background);
+Actor* init_asteroid(float initialR);
 

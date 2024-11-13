@@ -13,18 +13,23 @@
 #include "Gui.h"
 
 #define PI 3.14159265358979323
+
+#define INITIAL_ASTEROID_R 1.0
+#define REGULAR_ASTEROID_R 0.5
+#define SMALL_ASTEROID_R 0.1
+
 //Variabili globali -------------------------------------------------------------------
 unsigned int fgShaders, bgShaders;
 float r = 0.0, g = 0.0, b = 0.0;
 float alpha;
 int height = 1000, width = 1000;
 Actor player = {}, background = {};
-Actor Asteroids[100] = {};
+Actor* Asteroids[10] = {};
 int i, j;
 mat4 Projection;
 GLuint MatProj, MatModel, loc_flagP, GameColor, vec_resS, loc_time;
 float clear_color[3] = { 1.0, 1.0, 1.0 };
-float step_t;
+float step_t, scale_factor;
 bool acc = false, TURN_LEFT = false, TURN_RIGHT = false;
 const double fpsLimit = 1.0 / 60.0;
 double lastUpdateTime = 0;  // number of seconds since the last loop
@@ -127,8 +132,17 @@ int main(void)
 
     //Inizializzazione di un VAO per la curva, con un VBO inizializzato a NULL con un massimo di 100 posizioni, di tipi GL_DYNAMIC_DRAW
 
+    scale_factor = 0.05;
+
     init_player_actor(&player);
     init_background_actor(&background);
+
+    srand(time(NULL));
+    for (int i = 0; i < 10; i++)
+    {
+        Asteroids[i] = init_asteroid(INITIAL_ASTEROID_R);
+        INIT_VAO_DYNAMIC_Curva(Asteroids[i]->shape);
+    }
 
     INIT_VAO_DYNAMIC_Curva(player.shape);
     INIT_VAO_DYNAMIC_Curva(background.shape);
@@ -137,7 +151,7 @@ int main(void)
 
     while (!glfwWindowShouldClose(window))
     {
-
+        
 
         double now = glfwGetTime();
         double deltaTime = now - lastUpdateTime;
@@ -168,8 +182,8 @@ int main(void)
 
             
 
-            player.position.x +=  (player.velocity * cos(player.direction));
-            player.position.y +=  (player.velocity * sin(player.direction));
+            player.position.x += (player.velocity * cos(player.direction));
+            player.position.y += (player.velocity * sin(player.direction));
 
 
             glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -179,9 +193,9 @@ int main(void)
             //drawing background
 
             glUseProgram(bgShaders);
-
+            
             background.shape->Model = mat4(1.0);
-            //background.shape->Model = scale(background.shape->Model, vec3(float(width) * 2.0, float(height) * 2.0, 1.0));
+            background.shape->Model = scale(background.shape->Model, vec3(float(width) * 2.0, float(height) * 2.0, 1.0));
 
             glUniform4fv(GameColor,1, value_ptr(vec4(clear_color[0], clear_color[1], clear_color[2], 0.0)));
             glUniformMatrix4fv(MatProj, 1, GL_FALSE, value_ptr(Projection));
@@ -197,7 +211,7 @@ int main(void)
 
             glUniformMatrix4fv(MatProj, 1, GL_FALSE, value_ptr(Projection));
             player.shape->Model = mat4(1.0);
-            player.shape->Model = scale(player.shape->Model, vec3(0.05, 0.05, 1.0));
+            player.shape->Model = scale(player.shape->Model, vec3(scale_factor, scale_factor, 1.0));
             player.shape->Model = translate(player.shape->Model, vec3(player.position.x, player.position.y, 0.0));
             player.shape->Model = rotate(player.shape->Model, player.direction-(float)PI/2 ,vec3(0.0, 0.0, 1.0));
             glUniform4fv(GameColor, 1, value_ptr(vec4(clear_color[0], clear_color[1], clear_color[2], 0.0)));
@@ -209,6 +223,8 @@ int main(void)
             glDrawArrays(player.shape->render, 0, player.shape->vertices.size());
             glBindVertexArray(0);
 
+
+            //pacman effect to always see the player
             if (player.position.x < -20.0) {
                 player.position.x = 20.0;
             }
@@ -220,6 +236,42 @@ int main(void)
             }
             else if (player.position.y > 20.0) {
                 player.position.y = -20.0;
+            }
+
+            for (int i = 0; i < 10; i++)
+            {
+                //drawing Asteroids
+
+                Asteroids[i]->position.x += (Asteroids[i]->velocity * cos(Asteroids[i]->direction));
+                Asteroids[i]->position.y += (Asteroids[i]->velocity * sin(Asteroids[i]->direction));
+
+                glUseProgram(fgShaders);
+
+                glUniformMatrix4fv(MatProj, 1, GL_FALSE, value_ptr(Projection));
+                Asteroids[i]->shape->Model = mat4(1.0);
+                Asteroids[i]->shape->Model = scale(Asteroids[i]->shape->Model, vec3(scale_factor, scale_factor, 1.0));
+                Asteroids[i]->shape->Model = translate(Asteroids[i]->shape->Model, vec3(Asteroids[i]->position.x, Asteroids[i]->position.y, 0.0));
+                glUniform4fv(GameColor, 1, value_ptr(vec4(clear_color[0], clear_color[1], clear_color[2], 0.0)));
+                glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Asteroids[i]->shape->Model));
+                glUniform1i(loc_flagP, 0);
+                glLineWidth(2.0);
+
+                glBindVertexArray(Asteroids[i]->shape->VAO);
+                glDrawArrays(Asteroids[i]->shape->render, 0, Asteroids[i]->shape->vertices.size());
+                glBindVertexArray(0);
+
+                if (Asteroids[i]->position.x < -(width*scale_factor/2)) {
+                    Asteroids[i]->position.x = (width * scale_factor/2);
+                }
+                else if (Asteroids[i]->position.x > (width * scale_factor/2)) {
+                    Asteroids[i]->position.x = -(width * scale_factor/2);
+                }
+                if (Asteroids[i]->position.y < -(height * scale_factor/2)) {
+                    Asteroids[i]->position.y = (height * scale_factor/2);
+                }
+                else if (Asteroids[i]->position.y > (height * scale_factor/2)) {
+                    Asteroids[i]->position.y = -(height * scale_factor/2);
+                }
             }
 
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // Renderizza i dati di disegno di ImGui

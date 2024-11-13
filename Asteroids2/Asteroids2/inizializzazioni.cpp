@@ -4,6 +4,8 @@
 #include "strutture.h"
 #include "geometria.h"
 
+#define PI 3.14159265358979323
+
 extern unsigned int fgShaders, bgShaders;
 
 void INIT_SHADER(void)
@@ -96,5 +98,18 @@ void init_background_actor(Actor* background) {
 
     background->shape = new Shape;
     init_background_shape(background->shape);
+}
+
+Actor* init_asteroid(float seed) {
+    Actor* asteroid = new Actor;
+
+    asteroid->direction = (rand()%100)/100.0 * 2 * PI;
+    asteroid->position.x = ((rand() % 100) / 100.0 * 40) - 20;
+    asteroid->position.y = ((rand() % 100) / 100.0 * 40) - 20;
+
+    asteroid->velocity = 0.01;
+    asteroid->shape = new Shape;
+    init_asteroid_shape(asteroid->shape, seed);
+    return asteroid;
 }
 
