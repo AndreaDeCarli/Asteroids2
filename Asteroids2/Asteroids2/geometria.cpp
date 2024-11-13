@@ -39,16 +39,18 @@ void init_player_shape(Shape* player) {
 
 void init_background_shape(Shape* background) {
 
+	background->vertices.clear();
+
 	background->vertices.push_back(vec3(-1.0,1.0, 0.0));
-	background->colors.push_back(vec4(0.0, 0.0, 0.0, 1.0));
+	background->colors.push_back(vec4(1.0, 0.0, 0.0, 1.0));
 	background->vertices.push_back(vec3(1.0, 1.0, 0.0));
 	background->colors.push_back(vec4(0.0, 0.0, 0.0, 1.0));
 	background->vertices.push_back(vec3(1.0, -1.0, 0.0));
-	background->colors.push_back(vec4(0.0, 0.0, 0.0, 1.0));
+	background->colors.push_back(vec4(0.0, 1.0, 0.0, 1.0));
 	background->vertices.push_back(vec3(-1.0, -1.0, 0.0));
-	background->colors.push_back(vec4(0.0, 0.0, 0.0, 1.0));
+	background->colors.push_back(vec4(1.0, 0.0, 0.0, 1.0));
 
-	background->nv = 4;
-	background->render = GL_TRIANGLES;
+	background->nv = background->vertices.size();
+	background->render = GL_TRIANGLE_FAN;
 }
 

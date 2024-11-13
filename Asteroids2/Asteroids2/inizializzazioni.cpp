@@ -4,7 +4,7 @@
 #include "strutture.h"
 #include "geometria.h"
 
-extern unsigned int programId;
+extern unsigned int fgShaders, bgShaders;
 
 void INIT_SHADER(void)
 {
@@ -12,6 +12,7 @@ void INIT_SHADER(void)
 
     char* vertexShader = (char*)"vertexshaderM.glsl";
     char* fragmentShader = (char*)"fragmentshaderM.glsl";
+    char* fragmentShaderBG = (char*)"fragmentshaderSpace.glsl";
     // La funzione successiva crea un programma shader completo a partire da due shader individuali: 
     // uno per la gestione dei vertici e uno per la gestione dei pixel. 
     // Il programma shader risultante viene identificato da un numero univoco (il programId) che verr  utilizzato in seguito per associarlo ad un oggetto grafico e per renderizzarlo.
@@ -20,10 +21,12 @@ void INIT_SHADER(void)
         //Linkaggio : Una volta compilati, i due shader vengono collegati insieme per formare un programma shader completo.
         // Creazione dell'identificativo: Viene generato un identificativo univoco per il programma shader e viene restituito alla funzione chiamante.
 
-    programId = ShaderMaker::createProgram(vertexShader, fragmentShader);
+    fgShaders = ShaderMaker::createProgram(vertexShader, fragmentShader);
 
 
-    glUseProgram(programId);
+
+
+    bgShaders = ShaderMaker::createProgram(vertexShader, fragmentShaderBG);
 }
 
 void INIT_VAO_DYNAMIC_Curva(Shape* fig)

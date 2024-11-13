@@ -14,14 +14,14 @@
 
 #define PI 3.14159265358979323
 //Variabili globali -------------------------------------------------------------------
-unsigned int programId;
+unsigned int fgShaders, bgShaders;
 float r = 0.0, g = 0.0, b = 0.0;
 float alpha;
-int height = 800, width = 800;
+int height = 1000, width = 1000;
 Actor player = {}, background = {};
 int i, j;
 mat4 Projection;
-GLuint MatProj, MatModel, loc_flagP, GameColor;
+GLuint MatProj, MatModel, loc_flagP, GameColor, vec_resS, loc_time;
 float clear_color[3] = { 1.0, 1.0, 1.0 };
 float step_t;
 bool acc = false, TURN_LEFT = false, TURN_RIGHT = false;
@@ -110,10 +110,17 @@ int main(void)
     Projection = ortho(-1.0f, 1.0f, -1.0f, 1.0f);
 
 
-    MatProj = glGetUniformLocation(programId, "Projection");
-    MatModel = glGetUniformLocation(programId, "Model");
-    GameColor = glGetUniformLocation(programId, "GameColor");
-    loc_flagP = glGetUniformLocation(programId, "flagP");
+    MatProj = glGetUniformLocation(fgShaders, "Projection");
+    MatModel = glGetUniformLocation(fgShaders, "Model");
+    GameColor = glGetUniformLocation(fgShaders, "GameColor");
+    loc_flagP = glGetUniformLocation(fgShaders, "flagP");
+
+    MatProj = glGetUniformLocation(bgShaders, "Projection");
+    MatModel = glGetUniformLocation(bgShaders, "Model");
+    GameColor = glGetUniformLocation(bgShaders, "GameColor");
+    loc_flagP = glGetUniformLocation(bgShaders, "flagP");
+    loc_time = glGetUniformLocation(bgShaders, "time");
+    vec_resS = glGetUniformLocation(bgShaders, "resolution");
 
     /* Loop until the user closes the window */
 
@@ -152,10 +159,10 @@ int main(void)
             }
 
             if (TURN_LEFT) {
-                player.direction += 2 * PI * 0.005;
+                player.direction += 2 * PI * 0.01;
             }
             if (TURN_RIGHT) {
-                player.direction -= 2 * PI * 0.005;
+                player.direction -= 2 * PI * 0.01;
             }
 
             
@@ -168,20 +175,33 @@ int main(void)
             glClear(GL_COLOR_BUFFER_BIT);
             my_interface();
 
+            //drawing background
+
+            glUseProgram(bgShaders);
+
+            background.shape->Model = mat4(1.0);
+            //background.shape->Model = scale(background.shape->Model, vec3(float(width) * 2.0, float(height) * 2.0, 1.0));
+
+            glUniform4fv(GameColor,1, value_ptr(vec4(clear_color[0], clear_color[1], clear_color[2], 0.0)));
+            glUniformMatrix4fv(MatProj, 1, GL_FALSE, value_ptr(Projection));
+            glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(background.shape->Model));
+            glUniform2fv(vec_resS, 1, value_ptr(vec2((float)height, (float)width)));
+            glUniform1f(loc_time, now);
+
+            glBindVertexArray(background.shape->VAO);
+            glDrawArrays(background.shape->render, 0, background.shape->nv);
+
+            //drawing player
+            glUseProgram(fgShaders);
+
             glUniformMatrix4fv(MatProj, 1, GL_FALSE, value_ptr(Projection));
             player.shape->Model = mat4(1.0);
-
             player.shape->Model = scale(player.shape->Model, vec3(0.05, 0.05, 1.0));
-            player.shape->Model = translate(player.shape->Model, vec3(
-                player.position.x,
-                player.position.y,
-                0.0));
+            player.shape->Model = translate(player.shape->Model, vec3(player.position.x, player.position.y, 0.0));
             player.shape->Model = rotate(player.shape->Model, player.direction-(float)PI/2 ,vec3(0.0, 0.0, 1.0));
-            
-            
+            glUniform4fv(GameColor, 1, value_ptr(vec4(clear_color[0], clear_color[1], clear_color[2], 0.0)));
             glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(player.shape->Model));
             glUniform1i(loc_flagP, 0);
-            glUniform4fv(GameColor,1, value_ptr(vec4(clear_color[0], clear_color[1], clear_color[2], 0.0)));
             glLineWidth(2.0);
 
             glBindVertexArray(player.shape->VAO);
@@ -201,7 +221,7 @@ int main(void)
 
     close_GUI();
 
-    glDeleteProgram(programId);
+    glDeleteProgram(fgShaders);
     
 
     glDeleteBuffers(1, &player.shape->VBO_vertices);
