@@ -6,6 +6,7 @@
 #include "gestione_curve.h"
 #include "gestione_interazioni.h"
 #include "geometria.h"
+#include "Utilities.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
@@ -22,15 +23,15 @@
 unsigned int fgShaders, bgShaders;
 float r = 0.0, g = 0.0, b = 0.0;
 float alpha;
-int height = 1000, width = 1000;
-Actor player = {}, background = {};
+int height = 1000, width = 1000, collision_timer = 0;
+Actor player = {}, background = {}, projectile = {};
 Actor* Asteroids[10] = {};
 int i, j;
 mat4 Projection;
 GLuint MatProj, MatModel, loc_flagP, GameColor, vec_resS, loc_time;
 float clear_color[3] = { 1.0, 1.0, 1.0 };
 float step_t, scale_factor;
-bool acc = false, TURN_LEFT = false, TURN_RIGHT = false;
+bool acc = false, TURN_LEFT = false, TURN_RIGHT = false, can_collide = true;
 const double fpsLimit = 1.0 / 60.0;
 double lastUpdateTime = 0;  // number of seconds since the last loop
 double lastFrameTime = 0;   // number of seconds since the last frame
@@ -140,7 +141,7 @@ int main(void)
     srand(time(NULL));
     for (int i = 0; i < 10; i++)
     {
-        Asteroids[i] = init_asteroid(INITIAL_ASTEROID_R);
+        Asteroids[i] = init_asteroid(INITIAL_ASTEROID_R, i);
         INIT_VAO_DYNAMIC_Curva(Asteroids[i]->shape);
     }
 
@@ -159,28 +160,33 @@ int main(void)
         glfwPollEvents();
 
         
+
+        
+        
         
         if ((now - lastFrameTime) >= fpsLimit)
         {
 
-            if (acc) {
+            if (acc)
                 player.velocity += 0.005;
-            }
-            else if (player.velocity > 0) {
+            else if (player.velocity > 0) 
                 player.velocity -= 0.004;
-            }
-            if (player.velocity < 0) {
+            if (player.velocity < 0) 
                 player.velocity = 0;
-            }
 
-            if (TURN_LEFT) {
+            if (TURN_LEFT) 
                 player.direction += 2 * PI * 0.01;
-            }
-            if (TURN_RIGHT) {
+            if (TURN_RIGHT) 
                 player.direction -= 2 * PI * 0.01;
-            }
 
-            
+            if (can_collide == false) {
+                collision_timer += 1;
+                if (collision_timer >= 30) {
+                    can_collide = true;
+                    collision_timer = 0;
+                }
+
+            }
 
             player.position.x += (player.velocity * cos(player.direction));
             player.position.y += (player.velocity * sin(player.direction));
@@ -209,20 +215,26 @@ int main(void)
             //drawing player
             glUseProgram(fgShaders);
 
+            
+
             glUniformMatrix4fv(MatProj, 1, GL_FALSE, value_ptr(Projection));
             player.shape->Model = mat4(1.0);
             player.shape->Model = scale(player.shape->Model, vec3(scale_factor, scale_factor, 1.0));
             player.shape->Model = translate(player.shape->Model, vec3(player.position.x, player.position.y, 0.0));
+            updateBB(player.shape);
             player.shape->Model = rotate(player.shape->Model, player.direction-(float)PI/2 ,vec3(0.0, 0.0, 1.0));
             glUniform4fv(GameColor, 1, value_ptr(vec4(clear_color[0], clear_color[1], clear_color[2], 0.0)));
             glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(player.shape->Model));
             glUniform1i(loc_flagP, 0);
             glLineWidth(2.0);
 
+            
+
             glBindVertexArray(player.shape->VAO);
             glDrawArrays(player.shape->render, 0, player.shape->vertices.size());
             glBindVertexArray(0);
 
+            
 
             //pacman effect to always see the player
             if (player.position.x < -20.0) {
@@ -242,6 +254,8 @@ int main(void)
             {
                 //drawing Asteroids
 
+                
+
                 Asteroids[i]->position.x += (Asteroids[i]->velocity * cos(Asteroids[i]->direction));
                 Asteroids[i]->position.y += (Asteroids[i]->velocity * sin(Asteroids[i]->direction));
 
@@ -251,6 +265,16 @@ int main(void)
                 Asteroids[i]->shape->Model = mat4(1.0);
                 Asteroids[i]->shape->Model = scale(Asteroids[i]->shape->Model, vec3(scale_factor, scale_factor, 1.0));
                 Asteroids[i]->shape->Model = translate(Asteroids[i]->shape->Model, vec3(Asteroids[i]->position.x, Asteroids[i]->position.y, 0.0));
+                updateBB(Asteroids[i]->shape);
+
+                Asteroids[i]->shape->Model = rotate(Asteroids[i]->shape->Model, Asteroids[i]->direction, vec3(0.0, 0.0, 1.0));
+                
+                if (checkCollision(player.shape, Asteroids[i]->shape) && can_collide) {
+                    player.direction += PI/2;
+                    player.health -= 0.1;
+                    can_collide = false;
+                }
+                
                 glUniform4fv(GameColor, 1, value_ptr(vec4(clear_color[0], clear_color[1], clear_color[2], 0.0)));
                 glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Asteroids[i]->shape->Model));
                 glUniform1i(loc_flagP, 0);
@@ -259,20 +283,22 @@ int main(void)
                 glBindVertexArray(Asteroids[i]->shape->VAO);
                 glDrawArrays(Asteroids[i]->shape->render, 0, Asteroids[i]->shape->vertices.size());
                 glBindVertexArray(0);
+                
 
-                if (Asteroids[i]->position.x < -(width*scale_factor/2)) {
-                    Asteroids[i]->position.x = (width * scale_factor/2);
+                if (Asteroids[i]->position.x < -20.0) {
+                    Asteroids[i]->position.x = 20.0;
                 }
-                else if (Asteroids[i]->position.x > (width * scale_factor/2)) {
-                    Asteroids[i]->position.x = -(width * scale_factor/2);
+                else if (Asteroids[i]->position.x > 20.0) {
+                    Asteroids[i]->position.x = -20.0;
                 }
-                if (Asteroids[i]->position.y < -(height * scale_factor/2)) {
-                    Asteroids[i]->position.y = (height * scale_factor/2);
+                if (Asteroids[i]->position.y < -20.0) {
+                    Asteroids[i]->position.y = 20.0;
                 }
-                else if (Asteroids[i]->position.y > (height * scale_factor/2)) {
-                    Asteroids[i]->position.y = -(height * scale_factor/2);
+                else if (Asteroids[i]->position.y > 20.0) {
+                    Asteroids[i]->position.y = -20.0;
                 }
             }
+            
 
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // Renderizza i dati di disegno di ImGui
             glfwSwapBuffers(window);

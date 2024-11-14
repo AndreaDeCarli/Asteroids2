@@ -3,6 +3,7 @@
 #include "ShaderMaker.h"
 #include "strutture.h"
 #include "geometria.h"
+#include "Utilities.h"
 
 #define PI 3.14159265358979323
 
@@ -15,14 +16,7 @@ void INIT_SHADER(void)
     char* vertexShader = (char*)"vertexshaderM.glsl";
     char* fragmentShader = (char*)"fragmentshaderM.glsl";
     char* fragmentShaderBG = (char*)"fragmentshaderSpace.glsl";
-    // La funzione successiva crea un programma shader completo a partire da due shader individuali: 
-    // uno per la gestione dei vertici e uno per la gestione dei pixel. 
-    // Il programma shader risultante viene identificato da un numero univoco (il programId) che verr  utilizzato in seguito per associarlo ad un oggetto grafico e per renderizzarlo.
-     //All'interno della funzione ShaderMaker::createProgram
-        //Compilazione degli shader : La funzione compila i due shader individuali, verificando che non ci siano errori di sintassi.
-        //Linkaggio : Una volta compilati, i due shader vengono collegati insieme per formare un programma shader completo.
-        // Creazione dell'identificativo: Viene generato un identificativo univoco per il programma shader e viene restituito alla funzione chiamante.
-
+    
     fgShaders = ShaderMaker::createProgram(vertexShader, fragmentShader);
 
 
@@ -82,6 +76,7 @@ void UPDATE_VAO_Curva(Shape* fig)
 
 
 void init_player_actor(Actor* player) {
+    player->health = 1.0;
     player->velocity = 0.0;
     player->direction = 0.0;
     player->position.x = 0.0;
@@ -100,7 +95,7 @@ void init_background_actor(Actor* background) {
     init_background_shape(background->shape);
 }
 
-Actor* init_asteroid(float seed) {
+Actor* init_asteroid(float initialR, int index) {
     Actor* asteroid = new Actor;
 
     asteroid->direction = (rand()%100)/100.0 * 2 * PI;
@@ -109,7 +104,18 @@ Actor* init_asteroid(float seed) {
 
     asteroid->velocity = 0.01;
     asteroid->shape = new Shape;
-    init_asteroid_shape(asteroid->shape, seed);
+    init_asteroid_shape(asteroid->shape, initialR);
+
+    findBB(asteroid->shape);
+
     return asteroid;
+}
+
+void init_projectile_actor(Actor* projectile) {
+    projectile->velocity = 1.0;
+    projectile->direction = 0.0;
+
+    projectile->position.x = 1.0;
+    projectile->position.y = 1.0;
 }
 

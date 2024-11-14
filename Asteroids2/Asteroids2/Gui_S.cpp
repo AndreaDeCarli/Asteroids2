@@ -46,7 +46,9 @@ void my_interface( )
         // Create a window for color settings
         ImGui::Begin("Impostazioni");
         
-        ImGui::ColorEdit4("Colore", clear_color);        
+        ImGui::ColorEdit4("Colore", clear_color);
+
+        ImGui::ProgressBar(player.health);
 
         ImGui::End(); // Termina la finestra
 

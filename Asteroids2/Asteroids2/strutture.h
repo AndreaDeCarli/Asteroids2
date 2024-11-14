@@ -20,6 +20,10 @@ typedef struct {
     std::vector<glm::vec4> colors;    // Colori dei vertici della curva
     std::vector<glm::vec3> CP;        // Coordinate dei control points (punti di controllo)
     std::vector<glm::vec4> colCP;     // Colori dei control points
+    vec4 min_BB_obj;
+    vec4 max_BB_obj;
+    vec4 min_BB;
+    vec4 max_BB;
 
     // Parametri di interpolazione
     std::vector<glm::vec3> Derivata;  // Vettore derivata (a cosa serve esattamente?)
@@ -41,6 +45,8 @@ typedef struct {
 }Position;
 
 typedef struct {
+    int index;
+    float health;
     float velocity;
     float direction;
     Position position;

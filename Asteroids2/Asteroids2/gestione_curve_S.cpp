@@ -96,8 +96,6 @@ void InterpolazioneHermite(Shape* curva, vec4 color)
 
 		curva->vertices.push_back(vec3(x,y,0.0)); 
 		curva->colors.push_back(color);
-		
-
 	}
 	
 }
