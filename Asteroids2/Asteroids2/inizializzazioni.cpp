@@ -112,10 +112,19 @@ Actor* init_asteroid(float initialR, int index) {
 }
 
 void init_projectile_actor(Actor* projectile) {
-    projectile->velocity = 1.0;
+
+    projectile->health = 1.0;
+
+    projectile->velocity = 2.0;
     projectile->direction = 0.0;
 
-    projectile->position.x = 1.0;
-    projectile->position.y = 1.0;
+    projectile->position.x = 0.0;
+    projectile->position.y = 0.0;
+
+    projectile->shape = new Shape;
+    init_projectile_shape(projectile->shape);
+
+    findBB(projectile->shape);
+
 }
 

@@ -48,7 +48,7 @@ void init_background_shape(Shape* background) {
 	background->vertices.clear();
 
 	background->vertices.push_back(vec3(-1.0,1.0, 0.0));
-	background->colors.push_back(vec4(1.0, 0.0, 0.0, 1.0));
+	background->colors.push_back(vec4(1.0, 1.0, 1.0, 1.0));
 	background->vertices.push_back(vec3(1.0, 1.0, 0.0));
 	background->colors.push_back(vec4(0.0, 0.0, 0.0, 1.0));
 	background->vertices.push_back(vec3(1.0, -1.0, 0.0));
@@ -70,7 +70,7 @@ void init_asteroid_shape(Shape* asteroid, float initialR) {
 
 	for (int t = 0; t < 8; t++)
 	{
-		r = initialR + (rand() % 100) / 100.0;
+		r = initialR + ((rand() % 100) / 100.0)*initialR;
 		vertex = vec3((float)cos(t*step)*r,(float)sin(t*step)*r,0.0);
 		if (first) {
 			first_vertex = vertex;
@@ -87,4 +87,21 @@ void init_asteroid_shape(Shape* asteroid, float initialR) {
 	CostruisciHermite(asteroid, vec4(1.0, 1.0, 1.0, 1.0));
 
 	asteroid->render = GL_LINE_LOOP;
+}
+
+void init_projectile_shape(Shape* projectile) {
+
+	projectile->vertices.clear();
+
+	projectile->vertices.push_back(vec3(-0.1, 0.3, 0.0));
+	projectile->colors.push_back(vec4(1.0, 1.0, 1.0, 1.0));
+	projectile->vertices.push_back(vec3(0.1, 0.3, 0.0));
+	projectile->colors.push_back(vec4(0.0, 0.0, 0.0, 1.0));
+	projectile->vertices.push_back(vec3(0.1, -0.3, 0.0));
+	projectile->colors.push_back(vec4(0.0, 1.0, 0.0, 1.0));
+	projectile->vertices.push_back(vec3(-0.1, -0.3, 0.0));
+	projectile->colors.push_back(vec4(1.0, 0.0, 0.0, 1.0));
+
+	projectile->nv = projectile->vertices.size();
+	projectile->render = GL_TRIANGLE_FAN;
 }

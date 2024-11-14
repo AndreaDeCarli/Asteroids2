@@ -18,7 +18,7 @@ extern GLFWwindow* window;
 extern float r, g, b;
 extern double mousex,mousey;
 extern int height, width;
-extern bool acc, TURN_LEFT, TURN_RIGHT;
+extern bool acc, TURN_LEFT, TURN_RIGHT, shot;
 extern Actor player;
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
     
@@ -62,6 +62,11 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
             }
             else if (action == GLFW_RELEASE) {
                 TURN_RIGHT = false;
+            }
+            break;
+        case GLFW_KEY_SPACE:
+            if (action == GLFW_PRESS) {
+                shot = true;
             }
             break;
         default:

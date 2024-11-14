@@ -15,7 +15,7 @@
 
 #define PI 3.14159265358979323
 
-#define INITIAL_ASTEROID_R 1.0
+#define INITIAL_ASTEROID_R 1.2
 #define REGULAR_ASTEROID_R 0.5
 #define SMALL_ASTEROID_R 0.1
 
@@ -31,7 +31,7 @@ mat4 Projection;
 GLuint MatProj, MatModel, loc_flagP, GameColor, vec_resS, loc_time;
 float clear_color[3] = { 1.0, 1.0, 1.0 };
 float step_t, scale_factor;
-bool acc = false, TURN_LEFT = false, TURN_RIGHT = false, can_collide = true;
+bool acc = false, TURN_LEFT = false, TURN_RIGHT = false, can_collide = true, shot = false;
 const double fpsLimit = 1.0 / 60.0;
 double lastUpdateTime = 0;  // number of seconds since the last loop
 double lastFrameTime = 0;   // number of seconds since the last frame
@@ -137,6 +137,7 @@ int main(void)
 
     init_player_actor(&player);
     init_background_actor(&background);
+    init_projectile_actor(&projectile);
 
     srand(time(NULL));
     for (int i = 0; i < 10; i++)
@@ -147,6 +148,7 @@ int main(void)
 
     INIT_VAO_DYNAMIC_Curva(player.shape);
     INIT_VAO_DYNAMIC_Curva(background.shape);
+    INIT_VAO_DYNAMIC_Curva(projectile.shape);
 
     Initialize_IMGUI(window);
 
@@ -228,33 +230,54 @@ int main(void)
             glUniform1i(loc_flagP, 0);
             glLineWidth(2.0);
 
-            
-
             glBindVertexArray(player.shape->VAO);
             glDrawArrays(player.shape->render, 0, player.shape->vertices.size());
             glBindVertexArray(0);
 
-            
-
             //pacman effect to always see the player
-            if (player.position.x < -20.0) {
-                player.position.x = 20.0;
+            pacmanEffect(&player,20.0);
+
+            //Drawing projectile
+
+            if (shot) {
+                projectile.position.x += (projectile.velocity * cos(projectile.direction));
+                projectile.position.y += (projectile.velocity * sin(projectile.direction));
+
+                glUseProgram(fgShaders);
+
+                glUniformMatrix4fv(MatProj, 1, GL_FALSE, value_ptr(Projection));
+                projectile.shape->Model = mat4(1.0);
+                projectile.shape->Model = scale(projectile.shape->Model, vec3(scale_factor, scale_factor, 1.0));
+                projectile.shape->Model = translate(projectile.shape->Model, vec3(projectile.position.x, projectile.position.y, 0.0));
+                updateBB(projectile.shape);
+                projectile.shape->Model = rotate(projectile.shape->Model, projectile.direction - (float)PI / 2, vec3(0.0, 0.0, 1.0));
+                glUniform4fv(GameColor, 1, value_ptr(vec4(clear_color[0], clear_color[1], clear_color[2], 0.0)));
+                glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(projectile.shape->Model));
+                glUniform1i(loc_flagP, 0);
+
+                glBindVertexArray(projectile.shape->VAO);
+                glDrawArrays(projectile.shape->render, 0, projectile.shape->vertices.size());
+                glBindVertexArray(0);
+
+                if (outsideBoundary(&projectile, 20.0)) {
+                    shot = false;
+                }
+
             }
-            else if (player.position.x > 20.0) {
-                player.position.x = -20.0;
-            }
-            if (player.position.y < -20.0) {
-                player.position.y = 20.0;
-            }
-            else if (player.position.y > 20.0) {
-                player.position.y = -20.0;
+            else {
+
+                projectile.position.x = player.position.x;
+                projectile.position.y = player.position.y;
+                projectile.direction = player.direction;
+                projectile.shape->Model = mat4(1.0);
+                projectile.shape->Model = scale(projectile.shape->Model, vec3(scale_factor, scale_factor, 1.0));
+                projectile.shape->Model = translate(projectile.shape->Model, vec3(projectile.position.x, projectile.position.y, 0.0));
+                updateBB(projectile.shape);
             }
 
-            for (int i = 0; i < 10; i++)
-            {
-                //drawing Asteroids
+            //drawing Asteroids
 
-                
+            for (int i = 0; i < 10; i++){
 
                 Asteroids[i]->position.x += (Asteroids[i]->velocity * cos(Asteroids[i]->direction));
                 Asteroids[i]->position.y += (Asteroids[i]->velocity * sin(Asteroids[i]->direction));
@@ -274,6 +297,11 @@ int main(void)
                     player.health -= 0.1;
                     can_collide = false;
                 }
+
+                if (checkCollision(projectile.shape, Asteroids[i]->shape)) {
+                    Asteroids[i]->shape->render = GL_TRIANGLE_FAN;
+                    shot = false;
+                }
                 
                 glUniform4fv(GameColor, 1, value_ptr(vec4(clear_color[0], clear_color[1], clear_color[2], 0.0)));
                 glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Asteroids[i]->shape->Model));
@@ -285,18 +313,8 @@ int main(void)
                 glBindVertexArray(0);
                 
 
-                if (Asteroids[i]->position.x < -20.0) {
-                    Asteroids[i]->position.x = 20.0;
-                }
-                else if (Asteroids[i]->position.x > 20.0) {
-                    Asteroids[i]->position.x = -20.0;
-                }
-                if (Asteroids[i]->position.y < -20.0) {
-                    Asteroids[i]->position.y = 20.0;
-                }
-                else if (Asteroids[i]->position.y > 20.0) {
-                    Asteroids[i]->position.y = -20.0;
-                }
+                Asteroids[i]->shape->render = GL_LINE_LOOP;
+                pacmanEffect(Asteroids[i], 20.0);
             }
             
 

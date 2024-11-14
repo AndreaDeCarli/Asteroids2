@@ -59,3 +59,25 @@ void updateBB(Shape* fig)
     fig->min_BB = fig->Model * fig->min_BB;
     fig->max_BB = fig->Model * fig->max_BB;
 }
+
+void pacmanEffect(Actor* actor, float limits) {
+    if (actor->position.x < -limits) {
+        actor->position.x = limits;
+    }
+    else if (actor->position.x > limits) {
+        actor->position.x = -limits;
+    }
+    if (actor->position.y < -limits) {
+        actor->position.y = limits;
+    }
+    else if (actor->position.y > limits) {
+        actor->position.y = -limits;
+    }
+}
+
+bool outsideBoundary(Actor* actor, float limits) {
+    if (actor->position.x > limits || actor->position.x < -limits || actor->position.y > limits || actor->position.y < -limits) {
+        return true;
+    }
+    return false;
+}
