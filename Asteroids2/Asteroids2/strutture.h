@@ -45,6 +45,8 @@ typedef struct {
 }Position;
 
 typedef struct {
+    bool isAlive;
+    int radius_index;
     int index;
     float health;
     float velocity;

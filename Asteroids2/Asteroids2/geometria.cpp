@@ -61,16 +61,21 @@ void init_background_shape(Shape* background) {
 }
 
 
-void init_asteroid_shape(Shape* asteroid, float initialR) {
+void init_asteroid_shape(Shape* asteroid, float radius) {
 	float step = PI / 4;
 	float r = 0;
 	vec3 vertex;
 	vec3 first_vertex;
 	bool first = true;
 
+	asteroid->vertices.clear();
+	asteroid->Derivata.clear();
+	asteroid->CP.clear();
+	asteroid->colors.clear();
+
 	for (int t = 0; t < 8; t++)
 	{
-		r = initialR + ((rand() % 100) / 100.0)*initialR;
+		r = radius + ((rand() % 100) / 100.0)*radius;
 		vertex = vec3((float)cos(t*step)*r,(float)sin(t*step)*r,0.0);
 		if (first) {
 			first_vertex = vertex;

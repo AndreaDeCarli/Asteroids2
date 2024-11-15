@@ -8,6 +8,7 @@
 #define PI 3.14159265358979323
 
 extern unsigned int fgShaders, bgShaders;
+extern float asteroidR[3];
 
 void INIT_SHADER(void)
 {
@@ -76,6 +77,7 @@ void UPDATE_VAO_Curva(Shape* fig)
 
 
 void init_player_actor(Actor* player) {
+    player->isAlive = true;
     player->health = 1.0;
     player->velocity = 0.0;
     player->direction = 0.0;
@@ -95,8 +97,12 @@ void init_background_actor(Actor* background) {
     init_background_shape(background->shape);
 }
 
-Actor* init_asteroid(float initialR, int index) {
+Actor* init_asteroid(int initialR, int index) {
     Actor* asteroid = new Actor;
+    asteroid->index = index;
+    asteroid->health = 1.0;
+    asteroid->isAlive = true;
+    asteroid->radius_index = initialR;
 
     asteroid->direction = (rand()%100)/100.0 * 2 * PI;
     asteroid->position.x = ((rand() % 100) / 100.0 * 40) - 20;
@@ -104,7 +110,7 @@ Actor* init_asteroid(float initialR, int index) {
 
     asteroid->velocity = 0.01;
     asteroid->shape = new Shape;
-    init_asteroid_shape(asteroid->shape, initialR);
+    init_asteroid_shape(asteroid->shape, asteroidR[asteroid->radius_index]);
 
     findBB(asteroid->shape);
 
@@ -115,7 +121,7 @@ void init_projectile_actor(Actor* projectile) {
 
     projectile->health = 1.0;
 
-    projectile->velocity = 2.0;
+    projectile->velocity = 1.5;
     projectile->direction = 0.0;
 
     projectile->position.x = 0.0;

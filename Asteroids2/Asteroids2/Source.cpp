@@ -15,21 +15,21 @@
 
 #define PI 3.14159265358979323
 
-#define INITIAL_ASTEROID_R 1.2
-#define REGULAR_ASTEROID_R 0.5
-#define SMALL_ASTEROID_R 0.1
+
+
+#define COLLISION_TIMEOUT 20
 
 //Variabili globali -------------------------------------------------------------------
 unsigned int fgShaders, bgShaders;
 float r = 0.0, g = 0.0, b = 0.0;
 float alpha;
-int height = 1000, width = 1000, collision_timer = 0;
+int height = 1000, width = 1000, collision_timer = 0, numberOfAsteroids = 10;
 Actor player = {}, background = {}, projectile = {};
-Actor* Asteroids[10] = {};
+Actor* Asteroids[30] = {};
 int i, j;
 mat4 Projection;
 GLuint MatProj, MatModel, loc_flagP, GameColor, vec_resS, loc_time;
-float clear_color[3] = { 1.0, 1.0, 1.0 };
+float clear_color[3] = { 1.0, 1.0, 1.0 }, asteroidR[3] = {1.5, 0.75, 0.5};
 float step_t, scale_factor;
 bool acc = false, TURN_LEFT = false, TURN_RIGHT = false, can_collide = true, shot = false;
 const double fpsLimit = 1.0 / 60.0;
@@ -142,7 +142,7 @@ int main(void)
     srand(time(NULL));
     for (int i = 0; i < 10; i++)
     {
-        Asteroids[i] = init_asteroid(INITIAL_ASTEROID_R, i);
+        Asteroids[i] = init_asteroid(0, i);
         INIT_VAO_DYNAMIC_Curva(Asteroids[i]->shape);
     }
 
@@ -161,11 +161,6 @@ int main(void)
 
         glfwPollEvents();
 
-        
-
-        
-        
-        
         if ((now - lastFrameTime) >= fpsLimit)
         {
 
@@ -183,7 +178,7 @@ int main(void)
 
             if (can_collide == false) {
                 collision_timer += 1;
-                if (collision_timer >= 30) {
+                if (collision_timer >= COLLISION_TIMEOUT) {
                     can_collide = true;
                     collision_timer = 0;
                 }
@@ -215,27 +210,31 @@ int main(void)
             glDrawArrays(background.shape->render, 0, background.shape->nv);
 
             //drawing player
-            glUseProgram(fgShaders);
 
-            
+            if (player.isAlive) {
+                glUseProgram(fgShaders);
 
-            glUniformMatrix4fv(MatProj, 1, GL_FALSE, value_ptr(Projection));
-            player.shape->Model = mat4(1.0);
-            player.shape->Model = scale(player.shape->Model, vec3(scale_factor, scale_factor, 1.0));
-            player.shape->Model = translate(player.shape->Model, vec3(player.position.x, player.position.y, 0.0));
-            updateBB(player.shape);
-            player.shape->Model = rotate(player.shape->Model, player.direction-(float)PI/2 ,vec3(0.0, 0.0, 1.0));
-            glUniform4fv(GameColor, 1, value_ptr(vec4(clear_color[0], clear_color[1], clear_color[2], 0.0)));
-            glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(player.shape->Model));
-            glUniform1i(loc_flagP, 0);
-            glLineWidth(2.0);
 
-            glBindVertexArray(player.shape->VAO);
-            glDrawArrays(player.shape->render, 0, player.shape->vertices.size());
-            glBindVertexArray(0);
 
-            //pacman effect to always see the player
-            pacmanEffect(&player,20.0);
+                glUniformMatrix4fv(MatProj, 1, GL_FALSE, value_ptr(Projection));
+                player.shape->Model = mat4(1.0);
+                player.shape->Model = scale(player.shape->Model, vec3(scale_factor, scale_factor, 1.0));
+                player.shape->Model = translate(player.shape->Model, vec3(player.position.x, player.position.y, 0.0));
+                updateBB(player.shape);
+                player.shape->Model = rotate(player.shape->Model, player.direction - (float)PI / 2, vec3(0.0, 0.0, 1.0));
+                glUniform4fv(GameColor, 1, value_ptr(vec4(clear_color[0], clear_color[1], clear_color[2], 0.0)));
+                glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(player.shape->Model));
+                glUniform1i(loc_flagP, 0);
+                glLineWidth(2.0);
+
+                glBindVertexArray(player.shape->VAO);
+                glDrawArrays(player.shape->render, 0, player.shape->vertices.size());
+                glBindVertexArray(0);
+                player.shape->render = GL_LINE_LOOP;
+
+                //pacman effect to always see the player
+                pacmanEffect(&player, 20.0);
+            }
 
             //Drawing projectile
 
@@ -277,47 +276,91 @@ int main(void)
 
             //drawing Asteroids
 
-            for (int i = 0; i < 10; i++){
+            for (int i = 0; i < numberOfAsteroids; i++){
 
-                Asteroids[i]->position.x += (Asteroids[i]->velocity * cos(Asteroids[i]->direction));
-                Asteroids[i]->position.y += (Asteroids[i]->velocity * sin(Asteroids[i]->direction));
+                if (Asteroids[i]->health <= 0) 
+                {
+                    if (Asteroids[i]->radius_index == 2) {
+                        Asteroids[i]->isAlive = false;
+                    }
+                    else {
+                        float original_direction = Asteroids[i]->direction;
+                        float asteroid_x = Asteroids[i]->position.x;
+                        float asteroid_y = Asteroids[i]->position.y;
+                        Asteroids[i]->radius_index++;
+                        init_asteroid_shape(Asteroids[i]->shape, asteroidR[Asteroids[i]->radius_index]);
+                        INIT_VAO_DYNAMIC_Curva(Asteroids[i]->shape);
+                        updateBB(Asteroids[i]->shape);
+                        Asteroids[numberOfAsteroids] = init_asteroid(Asteroids[i]->radius_index, numberOfAsteroids);
+                        INIT_VAO_DYNAMIC_Curva(Asteroids[numberOfAsteroids]->shape);
+                        updateBB(Asteroids[numberOfAsteroids]->shape);
+                        Asteroids[numberOfAsteroids]->position.x = asteroid_x;
+                        Asteroids[numberOfAsteroids]->position.y = asteroid_y;
+                        Asteroids[numberOfAsteroids]->direction = original_direction + PI / 6;
+                        Asteroids[i]->direction = original_direction - PI / 6;
+                        Asteroids[i]->health = 1.0;
 
-                glUseProgram(fgShaders);
+                        Asteroids[i]->velocity += 0.05;
+                        Asteroids[numberOfAsteroids]->velocity += 0.05;
 
-                glUniformMatrix4fv(MatProj, 1, GL_FALSE, value_ptr(Projection));
-                Asteroids[i]->shape->Model = mat4(1.0);
-                Asteroids[i]->shape->Model = scale(Asteroids[i]->shape->Model, vec3(scale_factor, scale_factor, 1.0));
-                Asteroids[i]->shape->Model = translate(Asteroids[i]->shape->Model, vec3(Asteroids[i]->position.x, Asteroids[i]->position.y, 0.0));
-                updateBB(Asteroids[i]->shape);
-
-                Asteroids[i]->shape->Model = rotate(Asteroids[i]->shape->Model, Asteroids[i]->direction, vec3(0.0, 0.0, 1.0));
-                
-                if (checkCollision(player.shape, Asteroids[i]->shape) && can_collide) {
-                    player.direction += PI/2;
-                    player.health -= 0.1;
-                    can_collide = false;
+                        numberOfAsteroids++;
+                    }
                 }
+                
 
-                if (checkCollision(projectile.shape, Asteroids[i]->shape)) {
-                    Asteroids[i]->shape->render = GL_TRIANGLE_FAN;
-                    shot = false;
+                if (Asteroids[i]->isAlive) {
+                    Asteroids[i]->position.x += (Asteroids[i]->velocity * cos(Asteroids[i]->direction));
+                    Asteroids[i]->position.y += (Asteroids[i]->velocity * sin(Asteroids[i]->direction));
+
+                    glUseProgram(fgShaders);
+
+                    glUniformMatrix4fv(MatProj, 1, GL_FALSE, value_ptr(Projection));
+                    Asteroids[i]->shape->Model = mat4(1.0);
+                    Asteroids[i]->shape->Model = scale(Asteroids[i]->shape->Model, vec3(scale_factor, scale_factor, 1.0));
+                    Asteroids[i]->shape->Model = translate(Asteroids[i]->shape->Model, vec3(Asteroids[i]->position.x, Asteroids[i]->position.y, 0.0));
+                    updateBB(Asteroids[i]->shape);
+
+                    //Asteroids[i]->shape->Model = rotate(Asteroids[i]->shape->Model, Asteroids[i]->direction, vec3(0.0, 0.0, 1.0));
+
+                    if (checkCollision(player.shape, Asteroids[i]->shape) && can_collide) {
+                        player.direction += PI / 2;
+                        player.health -= 0.1;
+                        if (player.health <= 0) {
+                            player.isAlive = false;
+                        }
+                        if (player.velocity <= 0.1) {
+                            player.velocity = 0.2;
+                        }
+                        else {
+                            player.velocity = player.velocity * 0.75;
+                        }
+                        player.shape->render = GL_TRIANGLE_FAN;
+                        can_collide = false;
+                    }
+
+                    if (checkCollision(projectile.shape, Asteroids[i]->shape) && shot) {
+                        Asteroids[i]->health -= 0.2;
+                        Asteroids[i]->shape->render = GL_TRIANGLE_FAN;
+                        shot = false;
+                    }
+
+                    glUniform4fv(GameColor, 1, value_ptr(vec4(clear_color[0], clear_color[1], clear_color[2], 0.0)));
+                    glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Asteroids[i]->shape->Model));
+                    glUniform1i(loc_flagP, 0);
+                    glLineWidth(2.0);
+
+                    glBindVertexArray(Asteroids[i]->shape->VAO);
+                    glDrawArrays(Asteroids[i]->shape->render, 0, Asteroids[i]->shape->vertices.size());
+                    glBindVertexArray(0);
+
+
+                    Asteroids[i]->shape->render = GL_LINE_LOOP;
+                    pacmanEffect(Asteroids[i], 22.0);
                 }
                 
-                glUniform4fv(GameColor, 1, value_ptr(vec4(clear_color[0], clear_color[1], clear_color[2], 0.0)));
-                glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Asteroids[i]->shape->Model));
-                glUniform1i(loc_flagP, 0);
-                glLineWidth(2.0);
-
-                glBindVertexArray(Asteroids[i]->shape->VAO);
-                glDrawArrays(Asteroids[i]->shape->render, 0, Asteroids[i]->shape->vertices.size());
-                glBindVertexArray(0);
-                
-
-                Asteroids[i]->shape->render = GL_LINE_LOOP;
-                pacmanEffect(Asteroids[i], 20.0);
             }
             
-
+            
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // Renderizza i dati di disegno di ImGui
             glfwSwapBuffers(window);
 
@@ -332,6 +375,7 @@ int main(void)
     close_GUI();
 
     glDeleteProgram(fgShaders);
+    glDeleteProgram(bgShaders);
     
 
     glDeleteBuffers(1, &player.shape->VBO_vertices);
