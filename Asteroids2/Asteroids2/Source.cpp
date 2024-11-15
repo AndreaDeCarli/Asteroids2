@@ -23,9 +23,9 @@
 unsigned int fgShaders, bgShaders;
 float r = 0.0, g = 0.0, b = 0.0;
 float alpha;
-int height = 1000, width = 1000, collision_timer = 0, numberOfAsteroids = 10;
+int height = 1000, width = 1000, collision_timer = 0, numberOfAsteroids = 10, score = 0;
 Actor player = {}, background = {}, projectile = {};
-Actor* Asteroids[30] = {};
+Actor* Asteroids[50] = {};
 int i, j;
 mat4 Projection;
 GLuint MatProj, MatModel, loc_flagP, GameColor, vec_resS, loc_time;
@@ -299,9 +299,9 @@ int main(void)
                         Asteroids[numberOfAsteroids]->direction = original_direction + PI / 6;
                         Asteroids[i]->direction = original_direction - PI / 6;
                         Asteroids[i]->health = 1.0;
-
-                        Asteroids[i]->velocity += 0.05;
                         Asteroids[numberOfAsteroids]->velocity += 0.05;
+
+                        Asteroids[i]->velocity = Asteroids[numberOfAsteroids]->velocity;
 
                         numberOfAsteroids++;
                     }
@@ -339,7 +339,7 @@ int main(void)
                     }
 
                     if (checkCollision(projectile.shape, Asteroids[i]->shape) && shot) {
-                        Asteroids[i]->health -= 0.2;
+                        Asteroids[i]->health -= 1.0;
                         Asteroids[i]->shape->render = GL_TRIANGLE_FAN;
                         shot = false;
                     }
@@ -381,6 +381,23 @@ int main(void)
     glDeleteBuffers(1, &player.shape->VBO_vertices);
     glDeleteBuffers(1, &player.shape->VBO_colors);
     glDeleteVertexArrays(1, &player.shape->VAO);
+
+
+    glDeleteBuffers(1, &background.shape->VBO_vertices);
+    glDeleteBuffers(1, &background.shape->VBO_colors);
+    glDeleteVertexArrays(1, &background.shape->VAO);
+
+
+    glDeleteBuffers(1, &projectile.shape->VBO_vertices);
+    glDeleteBuffers(1, &projectile.shape->VBO_colors);
+    glDeleteVertexArrays(1, &projectile.shape->VAO);
+
+    for (int i = 0; i < numberOfAsteroids; i++)
+    {
+        glDeleteBuffers(1, &Asteroids[i]->shape->VBO_vertices);
+        glDeleteBuffers(1, &Asteroids[i]->shape->VBO_colors);
+        glDeleteVertexArrays(1, &Asteroids[i]->shape->VAO);
+    }
 
 
     glfwTerminate();
