@@ -14,9 +14,6 @@
 #include "Gui.h"
 
 #define PI 3.14159265358979323
-
-
-
 #define COLLISION_TIMEOUT 20
 
 //Variabili globali -------------------------------------------------------------------
@@ -25,11 +22,11 @@ float r = 0.0, g = 0.0, b = 0.0;
 float alpha;
 int height = 1000, width = 1000, collision_timer = 0, numberOfAsteroids = 10, score = 0;
 Actor player = {}, background = {}, projectile = {};
-Actor* Asteroids[50] = {};
+Actor* Asteroids[40] = {};
 int i, j;
 mat4 Projection;
 GLuint MatProj, MatModel, loc_flagP, GameColor, vec_resS, loc_time;
-float clear_color[3] = { 1.0, 1.0, 1.0 }, asteroidR[3] = {1.5, 0.75, 0.5};
+float clear_color[3] = { 1.0, 1.0, 1.0 }, asteroidR[3] = {1.5, 0.75, 0.3};
 float step_t, scale_factor;
 bool acc = false, TURN_LEFT = false, TURN_RIGHT = false, can_collide = true, shot = false;
 const double fpsLimit = 1.0 / 60.0;
@@ -43,24 +40,23 @@ int main(void)
     GLFWwindow* window;
 
     /* Initialize the library */
-    if (!glfwInit())   //se glfwInit() dà valore falso, return -1
+    if (!glfwInit())   //if glfw is not loaded return -1
         return -1;
 
-    //Imposta le proprietà del contesto e del profile
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    //Abilita il double buffering
+    //Enabel double buffering
 
     glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(height, width, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(height, width, "Asteroids", NULL, NULL);
     if (!window)
     {
         std::cout << "Failed to create the window !" << std::endl;
-        glfwTerminate(); //Libera le risorse allcoata da glfwInit
+        glfwTerminate(); 
         return -1;
     }
 
@@ -129,17 +125,14 @@ int main(void)
     loc_time = glGetUniformLocation(bgShaders, "time");
     vec_resS = glGetUniformLocation(bgShaders, "resolution");
 
-    /* Loop until the user closes the window */
-
-    //Inizializzazione di un VAO per la curva, con un VBO inizializzato a NULL con un massimo di 100 posizioni, di tipi GL_DYNAMIC_DRAW
-
-    scale_factor = 0.05;
+    
+    scale_factor = 0.05f;
 
     init_player_actor(&player);
     init_background_actor(&background);
     init_projectile_actor(&projectile);
 
-    srand(time(NULL));
+    //srand(time(NULL));
     for (int i = 0; i < 10; i++)
     {
         Asteroids[i] = init_asteroid(0, i);
@@ -165,22 +158,23 @@ int main(void)
         {
 
             if (acc)
-                player.velocity += 0.005;
+                player.velocity += 0.005f;
             else if (player.velocity > 0) 
-                player.velocity -= 0.004;
+                player.velocity -= 0.004f;
             if (player.velocity < 0) 
                 player.velocity = 0;
 
             if (TURN_LEFT) 
-                player.direction += 2 * PI * 0.01;
+                player.direction += 2 * (float)PI * 0.01f;
             if (TURN_RIGHT) 
-                player.direction -= 2 * PI * 0.01;
+                player.direction -= 2 * (float)PI * 0.01f;
 
             if (can_collide == false) {
                 collision_timer += 1;
                 if (collision_timer >= COLLISION_TIMEOUT) {
                     can_collide = true;
                     collision_timer = 0;
+                    player.shape->render = GL_LINE_LOOP;
                 }
 
             }
@@ -204,7 +198,7 @@ int main(void)
             glUniformMatrix4fv(MatProj, 1, GL_FALSE, value_ptr(Projection));
             glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(background.shape->Model));
             glUniform2fv(vec_resS, 1, value_ptr(vec2((float)height, (float)width)));
-            glUniform1f(loc_time, now);
+            glUniform1f(loc_time, (float)now);
 
             glBindVertexArray(background.shape->VAO);
             glDrawArrays(background.shape->render, 0, background.shape->nv);
@@ -213,8 +207,6 @@ int main(void)
 
             if (player.isAlive) {
                 glUseProgram(fgShaders);
-
-
 
                 glUniformMatrix4fv(MatProj, 1, GL_FALSE, value_ptr(Projection));
                 player.shape->Model = mat4(1.0);
@@ -230,7 +222,6 @@ int main(void)
                 glBindVertexArray(player.shape->VAO);
                 glDrawArrays(player.shape->render, 0, player.shape->vertices.size());
                 glBindVertexArray(0);
-                player.shape->render = GL_LINE_LOOP;
 
                 //pacman effect to always see the player
                 pacmanEffect(&player, 20.0);
@@ -278,37 +269,41 @@ int main(void)
 
             for (int i = 0; i < numberOfAsteroids; i++){
 
-                if (Asteroids[i]->health <= 0) 
-                {
-                    if (Asteroids[i]->radius_index == 2) {
-                        Asteroids[i]->isAlive = false;
-                    }
-                    else {
-                        float original_direction = Asteroids[i]->direction;
-                        float asteroid_x = Asteroids[i]->position.x;
-                        float asteroid_y = Asteroids[i]->position.y;
-                        Asteroids[i]->radius_index++;
-                        init_asteroid_shape(Asteroids[i]->shape, asteroidR[Asteroids[i]->radius_index]);
-                        INIT_VAO_DYNAMIC_Curva(Asteroids[i]->shape);
-                        updateBB(Asteroids[i]->shape);
-                        Asteroids[numberOfAsteroids] = init_asteroid(Asteroids[i]->radius_index, numberOfAsteroids);
-                        INIT_VAO_DYNAMIC_Curva(Asteroids[numberOfAsteroids]->shape);
-                        updateBB(Asteroids[numberOfAsteroids]->shape);
-                        Asteroids[numberOfAsteroids]->position.x = asteroid_x;
-                        Asteroids[numberOfAsteroids]->position.y = asteroid_y;
-                        Asteroids[numberOfAsteroids]->direction = original_direction + PI / 6;
-                        Asteroids[i]->direction = original_direction - PI / 6;
-                        Asteroids[i]->health = 1.0;
-                        Asteroids[numberOfAsteroids]->velocity += 0.05;
-
-                        Asteroids[i]->velocity = Asteroids[numberOfAsteroids]->velocity;
-
-                        numberOfAsteroids++;
-                    }
-                }
+                
                 
 
                 if (Asteroids[i]->isAlive) {
+
+                    if (Asteroids[i]->health <= 0)
+                    {
+                        score += (Asteroids[i]->radius_index + 1) * 100;
+                        if (Asteroids[i]->radius_index == 2) { //if the asteroid is too small it is deleted.
+                            Asteroids[i]->isAlive = false;
+                        }
+                        else { //if the asteroid is shot at and is destroyed it generates two other asteroids.
+                            float original_direction = Asteroids[i]->direction;
+                            float asteroid_x = Asteroids[i]->position.x;
+                            float asteroid_y = Asteroids[i]->position.y;
+                            Asteroids[i]->radius_index++;
+                            init_asteroid_shape(Asteroids[i]->shape, asteroidR[Asteroids[i]->radius_index]);
+                            INIT_VAO_DYNAMIC_Curva(Asteroids[i]->shape);
+                            findBB(Asteroids[i]->shape);
+                            Asteroids[numberOfAsteroids] = init_asteroid(Asteroids[i]->radius_index, numberOfAsteroids);
+                            INIT_VAO_DYNAMIC_Curva(Asteroids[numberOfAsteroids]->shape);
+                            findBB(Asteroids[numberOfAsteroids]->shape);
+                            Asteroids[numberOfAsteroids]->position.x = asteroid_x;
+                            Asteroids[numberOfAsteroids]->position.y = asteroid_y;
+                            Asteroids[numberOfAsteroids]->direction = original_direction + (float)PI / 6;
+                            Asteroids[i]->direction = original_direction - (float)PI / 6;
+                            Asteroids[i]->health = 1.0;
+                            //Increse the speed of generated asteroids
+                            Asteroids[numberOfAsteroids]->velocity += 0.05f;
+                            Asteroids[i]->velocity = Asteroids[numberOfAsteroids]->velocity;
+
+                            numberOfAsteroids++;
+                        }
+                    }
+
                     Asteroids[i]->position.x += (Asteroids[i]->velocity * cos(Asteroids[i]->direction));
                     Asteroids[i]->position.y += (Asteroids[i]->velocity * sin(Asteroids[i]->direction));
 
@@ -320,19 +315,19 @@ int main(void)
                     Asteroids[i]->shape->Model = translate(Asteroids[i]->shape->Model, vec3(Asteroids[i]->position.x, Asteroids[i]->position.y, 0.0));
                     updateBB(Asteroids[i]->shape);
 
-                    //Asteroids[i]->shape->Model = rotate(Asteroids[i]->shape->Model, Asteroids[i]->direction, vec3(0.0, 0.0, 1.0));
+                    Asteroids[i]->shape->Model = rotate(Asteroids[i]->shape->Model, (float)now*(float)0.1, vec3(0.0, 0.0, 1.0));
 
                     if (checkCollision(player.shape, Asteroids[i]->shape) && can_collide) {
-                        player.direction += PI / 2;
-                        player.health -= 0.1;
+                        player.direction += (float)PI / 2;
+                        player.health -= 0.1f;
                         if (player.health <= 0) {
                             player.isAlive = false;
                         }
                         if (player.velocity <= 0.1) {
-                            player.velocity = 0.2;
+                            player.velocity = 0.2f;
                         }
                         else {
-                            player.velocity = player.velocity * 0.75;
+                            player.velocity = player.velocity * 0.75f;
                         }
                         player.shape->render = GL_TRIANGLE_FAN;
                         can_collide = false;
@@ -361,7 +356,7 @@ int main(void)
             }
             
             
-            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // Renderizza i dati di disegno di ImGui
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // Renders ImGui gui
             glfwSwapBuffers(window);
 
             // only set lastFrameTime when you actually draw something

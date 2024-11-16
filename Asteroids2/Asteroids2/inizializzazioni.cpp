@@ -85,6 +85,8 @@ void init_player_actor(Actor* player) {
     player->position.y = 0.0;
     player->shape = new Shape;
     init_player_shape(player->shape);
+
+    findBB(player->shape);
 }
 
 void init_background_actor(Actor* background) {

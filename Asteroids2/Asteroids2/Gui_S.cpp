@@ -12,7 +12,7 @@
 //extern ImVec4 clear_color;
 extern int  nClouds;
  extern float clear_color[3];
- extern int Mod, selected_point;
+ extern int Mod, selected_point, score;
  extern bool visualizzaTg, modTg;
  extern Shape curva;
  extern float* t;
@@ -46,10 +46,12 @@ void my_interface( )
         // Create a window for color settings
         ImGui::Begin("Impostazioni");
         
-        ImGui::ColorEdit4("Colore", clear_color);
+        ImGui::ColorEdit3("Colore", clear_color);
 
         ImGui::ProgressBar(player.health);
 
+        ImGui::InputInt("Score:", &score);
+        
         ImGui::End(); // Termina la finestra
 
         // Render ImGui

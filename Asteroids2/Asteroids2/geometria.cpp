@@ -37,8 +37,6 @@ void init_player_shape(Shape* player) {
 
 	CostruisciHermite(player, vec4(1.0, 1.0, 1.0, 1.0));
 
-	findBB(player);
-
 	player->render = GL_LINE_STRIP;
 }
 

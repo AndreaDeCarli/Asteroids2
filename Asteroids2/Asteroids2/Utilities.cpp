@@ -29,7 +29,7 @@ void findBB(Shape* fig) {
         }
     }
      
-    fig->min_BB_obj=vec4(minx,miny,0.0,1.0);
+    fig->min_BB_obj = vec4(minx,miny,0.0,1.0);
     fig->max_BB_obj = vec4(maxx, maxy, 0.0,1.0);
 
 }
