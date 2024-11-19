@@ -8,7 +8,7 @@
 
 void init_player_shape(Shape* player) {
 
-	vec4 whiteColor = vec4(1.0, 1.0, 1.0, 1.0);
+	//creo il player immettendo i vertici di controllo a mano e costruendo con essi una curva di Hermite
 
 	player->CP.push_back(vec3(0.0f, 1.0f, 0.0f));
 	player->Derivata.push_back(vec3(0.0, 0.0, 0.0));
@@ -43,6 +43,8 @@ void init_player_shape(Shape* player) {
 
 void init_background_shape(Shape* background) {
 
+	//un semplice quadrato con 4 vertici. non uso i vertici di controllo né l'algoritmo di Hemrmite
+
 	background->vertices.clear();
 
 	background->vertices.push_back(vec3(-1.0,1.0, 0.0));
@@ -71,9 +73,9 @@ void init_asteroid_shape(Shape* asteroid, float radius) {
 	asteroid->CP.clear();
 	asteroid->colors.clear();
 
-	for (int t = 0; t < 8; t++)
+	for (int t = 0; t < 8; t++) //uso un ciclo per disporre i vertici di controllo in cerchio
 	{
-		r = radius + ((rand() % 100) / 100.0)*radius;
+		r = radius + ((rand() % 100) / 100.0)*radius; //i vertici vengono disposti radialmente a raggi diversi per avere una forma più realistica
 		vertex = vec3((float)cos(t*step)*r,(float)sin(t*step)*r,0.0);
 		if (first) {
 			first_vertex = vertex;
@@ -82,10 +84,12 @@ void init_asteroid_shape(Shape* asteroid, float radius) {
 		asteroid->CP.push_back(vertex);
 		asteroid->Derivata.push_back(vec3(0.0,0.0,0.0));
 	}
-	asteroid->CP.push_back(first_vertex);
+	asteroid->CP.push_back(first_vertex); //per completare la forma dell'asteroide aggiungo di nuovo il primo vertice immesso
 	asteroid->Derivata.push_back(vec3(0.0, 0.0, 0.0));
 
 	asteroid->nv = 80;
+
+	//con i vertici di controllo disposti dal ciclo creo la curva di Hermite
 
 	CostruisciHermite(asteroid, vec4(1.0, 1.0, 1.0, 1.0));
 
@@ -93,6 +97,9 @@ void init_asteroid_shape(Shape* asteroid, float radius) {
 }
 
 void init_projectile_shape(Shape* projectile) {
+
+
+	//un semplice quadrato con 4 vertici. non uso i vertici di controllo né l'algoritmo di Hemrmite
 
 	projectile->vertices.clear();
 

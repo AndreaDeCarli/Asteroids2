@@ -40,7 +40,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
             break;
 
 
-        case GLFW_KEY_W:
+        case GLFW_KEY_W:  //mentre il tasto W è premuto la variabile di accelerazione rimane true
             if (action == GLFW_PRESS) {
                 acc = true;
             }
@@ -48,7 +48,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
                 acc = false;
             }
             break;
-        case GLFW_KEY_A:
+        case GLFW_KEY_A: //mentre il tasto A è premuto la variabile di rotazione a sinistra rimane true
             if (action == GLFW_PRESS) {
                 TURN_LEFT = true;
             }
@@ -56,7 +56,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
                 TURN_LEFT = false;
             }
             break;
-        case GLFW_KEY_D:
+        case GLFW_KEY_D: //mentre il tasto D è premuto la variabile rotazione a destra rimane true
             if (action == GLFW_PRESS) {
                 TURN_RIGHT = true;
             }
@@ -64,7 +64,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
                 TURN_RIGHT = false;
             }
             break;
-        case GLFW_KEY_SPACE:
+        case GLFW_KEY_SPACE: //quando il tasto SPAZIO viene premuto si attiva la variabile di sparo che verrà poii disattivata nel main
             if (action == GLFW_PRESS) {
                 shot = true;
             }

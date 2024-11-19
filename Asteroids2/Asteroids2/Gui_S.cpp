@@ -8,6 +8,8 @@
 #include "gestione_curve.h"
 #pragma warning(disable:4996)
 #include <math.h>
+#include <string>
+#include <iostream>
 
 //extern ImVec4 clear_color;
 extern int  nClouds;
@@ -50,7 +52,10 @@ void my_interface( )
 
         ImGui::ProgressBar(player.health);
 
-        ImGui::InputInt("Score:", &score);
+        std::string str = std::to_string(score);
+        const char* chararray = str.c_str();
+        ImGui::LabelText(chararray,"Score");
+
         
         ImGui::End(); // Termina la finestra
 
@@ -66,21 +71,5 @@ void close_GUI() {
 
 }
  
-
-// Create a window called "My First Tool", with a menu bar.
-//ImGui::Begin("My First Tool", &my_tool_active, ImGuiWindowFlags_MenuBar);
- 
-//if (ImGui::BeginMenuBar())
-//{
- //   if (ImGui::BeginMenu("File"))
- //   {
-     //   if (ImGui::MenuItem("Open..", "Ctrl+O")) { } 
-    //    if (ImGui::MenuItem("Save", "Ctrl+S")) { }
-     //   if (ImGui::MenuItem("Close", "Ctrl+W")) { my_tool_active = false; }
-    //    ImGui::EndMenu();
-    //}
-    
-   // ImGui::EndMenuBar();
-//}
  
  

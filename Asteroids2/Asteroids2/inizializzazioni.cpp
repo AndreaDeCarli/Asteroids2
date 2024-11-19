@@ -52,31 +52,10 @@ void INIT_VAO_DYNAMIC_Curva(Shape* fig)
 
     
 }
-void UPDATE_VAO_Curva(Shape* fig)
-{
-
-   
-
-    glBindVertexArray(fig->VAO);
-    //Genero , rendo attivo, riempio il VBO della geometria dei vertici di COntrollo
-     
-    glBindBuffer(GL_ARRAY_BUFFER, fig->VBO_vertices);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, fig->vertices.size() * sizeof(vec3), fig->vertices.data());
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glEnableVertexAttribArray(0);
-
-    //Genero , rendo attivo, riempio il VBO dei colori nei vertici di controllo
-    glBindBuffer(GL_ARRAY_BUFFER, fig->VBO_colors);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, fig->colors.size() * sizeof(vec4), fig->colors.data());
-    //Adesso carico il VBO dei colori nel layer 2
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glEnableVertexAttribArray(1);
-     
-}
 
 
 void init_player_actor(Actor* player) {
+    //crea la struttura del personaggio player
     player->isAlive = true;
     player->health = 1.0;
     player->velocity = 0.0;
@@ -86,10 +65,11 @@ void init_player_actor(Actor* player) {
     player->shape = new Shape;
     init_player_shape(player->shape);
 
-    findBB(player->shape);
+    findBB(player->shape);  //trovo il bounding box
 }
 
 void init_background_actor(Actor* background) {
+    //crea la struttura del personaggio background
     background->velocity = 0.0;
     background->direction = 0.0;
     background->position.x = 0.0;
@@ -99,27 +79,28 @@ void init_background_actor(Actor* background) {
     init_background_shape(background->shape);
 }
 
-Actor* init_asteroid(int initialR, int index) {
+Actor* init_asteroid(int initialR) {
+    //crea e restituisce la struttura di un nuovo asteroide
     Actor* asteroid = new Actor;
-    asteroid->index = index;
     asteroid->health = 1.0;
     asteroid->isAlive = true;
     asteroid->radius_index = initialR;
 
-    asteroid->direction = (rand()%100)/100.0 * 2 * PI;
-    asteroid->position.x = ((rand() % 100) / 100.0 * 40) - 20;
+    asteroid->direction = (rand()%100)/100.0 * 2 * PI;          //do all'asteroide una direzione casuale
+    asteroid->position.x = ((rand() % 100) / 100.0 * 40) - 20;  //do all'asteroide una posizione casuale
     asteroid->position.y = ((rand() % 100) / 100.0 * 40) - 20;
 
     asteroid->velocity = 0.01;
     asteroid->shape = new Shape;
     init_asteroid_shape(asteroid->shape, asteroidR[asteroid->radius_index]);
 
-    findBB(asteroid->shape);
+    findBB(asteroid->shape); //trovo il bounding box
 
     return asteroid;
 }
 
 void init_projectile_actor(Actor* projectile) {
+    //crea la struttura del personaggio proiettile
 
     projectile->health = 1.0;
 
@@ -132,7 +113,7 @@ void init_projectile_actor(Actor* projectile) {
     projectile->shape = new Shape;
     init_projectile_shape(projectile->shape);
 
-    findBB(projectile->shape);
+    findBB(projectile->shape); //trovo il bounding box
 
 }
 

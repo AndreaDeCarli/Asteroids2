@@ -45,13 +45,12 @@ typedef struct {
 }Position;
 
 typedef struct {
-    bool isAlive;
-    int radius_index;
-    int index;
-    float health;
-    float velocity;
-    float direction;
-    Position position;
-    Shape* shape;
+    bool isAlive;        //booleano che indica se il personaggio è vivo o morto
+    int radius_index;    //indice per sapere quale raggio prendere nell'array di raggi
+    float health;        //salute del personaggio
+    float velocity;      //velocità del personaggio
+    float direction;     //direzione del personaggio
+    Position position;   //posizione del personaggio
+    Shape* shape;        //forma del personaggio definita da vertici
 }Actor;
 

@@ -61,6 +61,7 @@ void updateBB(Shape* fig)
 }
 
 void pacmanEffect(Actor* actor, float limits) {
+    //aggiorna la posizione di un personaggio se va oltre un certo limite dato in input
     if (actor->position.x < -limits) {
         actor->position.x = limits;
     }
@@ -76,6 +77,7 @@ void pacmanEffect(Actor* actor, float limits) {
 }
 
 bool outsideBoundary(Actor* actor, float limits) {
+    //return true se il personaggio dato in input è fuori dai limiti della scena immessi
     if (actor->position.x > limits || actor->position.x < -limits || actor->position.y > limits || actor->position.y < -limits) {
         return true;
     }

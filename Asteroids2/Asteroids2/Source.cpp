@@ -15,23 +15,21 @@
 
 #define PI 3.14159265358979323
 #define COLLISION_TIMEOUT 20
+#define SCENE_LIMITS 20.0
 
 //Variabili globali -------------------------------------------------------------------
 unsigned int fgShaders, bgShaders;
-float r = 0.0, g = 0.0, b = 0.0;
-float alpha;
+float r = 0.0, g = 0.0, b = 0.0, alpha, scale_factor;
 int height = 1000, width = 1000, collision_timer = 0, numberOfAsteroids = 10, score = 0;
 Actor player = {}, background = {}, projectile = {};
 Actor* Asteroids[40] = {};
-int i, j;
 mat4 Projection;
 GLuint MatProj, MatModel, loc_flagP, GameColor, vec_resS, loc_time;
 float clear_color[3] = { 1.0, 1.0, 1.0 }, asteroidR[3] = {1.5, 0.75, 0.3};
-float step_t, scale_factor;
 bool acc = false, TURN_LEFT = false, TURN_RIGHT = false, can_collide = true, shot = false;
-const double fpsLimit = 1.0 / 60.0;
-double lastUpdateTime = 0;  // number of seconds since the last loop
-double lastFrameTime = 0;   // number of seconds since the last frame
+const double fpsLimit = 1.0 / 60.0; //limitatore dei frame per secondo
+double lastUpdateTime = 0;  // numero di secondi passati dall'ultimo loop
+double lastFrameTime = 0;   // numero di secondi passati dall'ultimo frame
 
 //----------------------------------------------------------------------------------------
 
@@ -39,7 +37,7 @@ int main(void)
 {
     GLFWwindow* window;
 
-    /* Initialize the library */
+    
     if (!glfwInit())   //if glfw is not loaded return -1
         return -1;
 
@@ -47,11 +45,11 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    //Enabel double buffering
+    //Enable double buffering
 
     glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
 
-    /* Create a windowed mode window and its OpenGL context */
+    
     window = glfwCreateWindow(height, width, "Asteroids", NULL, NULL);
     if (!window)
     {
@@ -60,7 +58,7 @@ int main(void)
         return -1;
     }
 
-    /* Make the window's context current */
+    
     glfwMakeContextCurrent(window); //crea il context corrente e lo associa a window. In opengl un rendering context è una macchina astati che memorizza tutte le informazioni necessarie e le risorse per il rendering grafico
 
 
@@ -74,42 +72,24 @@ int main(void)
         return -1;
     }
 
-    //Registrazione delle funzioni di callback che verranno chiamate quando si verificano
-   //  determinati eventi
-
-   //Implementa la chiusura dell'applicazione premendo il tasto Esc  e la modifica del colore dello sfondo con il tasto F2..
     glfwSetKeyCallback(window, key_callback);
 
-    //Per visualizzare le coordinate del mouse che si muove sulla finestra grafica
     glfwSetCursorPosCallback(window, cursor_position_callback);
 
 
-
-    //per visualizzare le dimensioni della finestra ridimensionata
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     INIT_SHADER();
 
-
-
-
-    //Registrazione delle funzioni di callback che verranno chiamate quando si verificano
-    //  determinati eventi
-
-    //Implementa la chiusura dell'applicazione premendo il tasto Esc  e la modifica del colore dello sfondo con il tasto F2..
     glfwSetKeyCallback(window, key_callback);
 
-    //Per visualizzare le coordinate del mouse che si muove sulla finestra grafica
     glfwSetCursorPosCallback(window, cursor_position_callback);
 
-    //Per visualizzare le coordinate individuate dal tasto sinistro premuto
     glfwSetMouseButtonCallback(window, mouse_button_callback);
 
-    //per visualizzare le dimensioni della finestra ridimensionata
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    //Projection = ortho(0.0f, float(width), 0.0f, float(height));
     Projection = ortho(-1.0f, 1.0f, -1.0f, 1.0f);
 
 
@@ -128,14 +108,14 @@ int main(void)
     
     scale_factor = 0.05f;
 
-    init_player_actor(&player);
-    init_background_actor(&background);
-    init_projectile_actor(&projectile);
+    init_player_actor(&player);          //inizializzo la struttura del player
+    init_background_actor(&background);  //inizializzo la struttura del background
+    init_projectile_actor(&projectile);  //inizializzo la struttura del proiettile
 
-    //srand(time(NULL));
-    for (int i = 0; i < 10; i++)
+    
+    for (int i = 0; i < 10; i++)         //inizializzo le strutture degli asteroidi
     {
-        Asteroids[i] = init_asteroid(0, i);
+        Asteroids[i] = init_asteroid(0);
         INIT_VAO_DYNAMIC_Curva(Asteroids[i]->shape);
     }
 
@@ -154,13 +134,13 @@ int main(void)
 
         glfwPollEvents();
 
-        if ((now - lastFrameTime) >= fpsLimit)
+        if ((now - lastFrameTime) >= fpsLimit) //limita il framerate a quelo desiderato
         {
 
             if (acc)
-                player.velocity += 0.005f;
+                player.velocity += 0.005f; //la velocità viene aumentata per tutto il tempo in cui la variabile di accelerazione è true
             else if (player.velocity > 0) 
-                player.velocity -= 0.004f;
+                player.velocity -= 0.003f; //altrimenti la velocità diminuisce costantemente
             if (player.velocity < 0) 
                 player.velocity = 0;
 
@@ -187,9 +167,9 @@ int main(void)
             glClear(GL_COLOR_BUFFER_BIT);
             my_interface();
 
-            //drawing background
+            //BACKGROUND------------------------------------------------------------------------------------
 
-            glUseProgram(bgShaders);
+            glUseProgram(bgShaders); //viene usato un altro shader per il background
             
             background.shape->Model = mat4(1.0);
             background.shape->Model = scale(background.shape->Model, vec3(float(width) * 2.0, float(height) * 2.0, 1.0));
@@ -203,7 +183,7 @@ int main(void)
             glBindVertexArray(background.shape->VAO);
             glDrawArrays(background.shape->render, 0, background.shape->nv);
 
-            //drawing player
+            //PLAYER------------------------------------------------------------------------------------
 
             if (player.isAlive) {
                 glUseProgram(fgShaders);
@@ -223,13 +203,13 @@ int main(void)
                 glDrawArrays(player.shape->render, 0, player.shape->vertices.size());
                 glBindVertexArray(0);
 
-                //pacman effect to always see the player
+                
                 pacmanEffect(&player, 20.0);
             }
 
-            //Drawing projectile
+            //PROIETTILE------------------------------------------------------------------------------------
 
-            if (shot) {
+            if (shot) { //solo se il proiettile è stato sparato aggiornerà la sua posizione nella direzione in cui è stato sparato
                 projectile.position.x += (projectile.velocity * cos(projectile.direction));
                 projectile.position.y += (projectile.velocity * sin(projectile.direction));
 
@@ -249,13 +229,13 @@ int main(void)
                 glDrawArrays(projectile.shape->render, 0, projectile.shape->vertices.size());
                 glBindVertexArray(0);
 
-                if (outsideBoundary(&projectile, 20.0)) {
+                if (outsideBoundary(&projectile, SCENE_LIMITS)) { //se il proiettile va fuori dai limiti smette di essere "sparato"
                     shot = false;
                 }
 
             }
             else {
-
+                //se il proiettile non è sparato allora aggiorna costantemente la sua posizione e direzione a quelle del player
                 projectile.position.x = player.position.x;
                 projectile.position.y = player.position.y;
                 projectile.direction = player.direction;
@@ -265,22 +245,20 @@ int main(void)
                 updateBB(projectile.shape);
             }
 
-            //drawing Asteroids
+            //ASTEROIDI------------------------------------------------------------------------------------
 
-            for (int i = 0; i < numberOfAsteroids; i++){
+            for (int i = 0; i < numberOfAsteroids; i++){ // ciclo su tutti gli asteroidi
 
                 
-                
-
-                if (Asteroids[i]->isAlive) {
+                if (Asteroids[i]->isAlive) { //solo se gli asteroidi sono vivi vengono renderizzati
 
                     if (Asteroids[i]->health <= 0)
                     {
                         score += (Asteroids[i]->radius_index + 1) * 100;
-                        if (Asteroids[i]->radius_index == 2) { //if the asteroid is too small it is deleted.
+                        if (Asteroids[i]->radius_index == 2) { //se l'asteroide è più piccolo di un certo threshold viene eliminato
                             Asteroids[i]->isAlive = false;
                         }
-                        else { //if the asteroid is shot at and is destroyed it generates two other asteroids.
+                        else { //se l'asteroide viene distrutto ne genera altri due
                             float original_direction = Asteroids[i]->direction;
                             float asteroid_x = Asteroids[i]->position.x;
                             float asteroid_y = Asteroids[i]->position.y;
@@ -288,7 +266,7 @@ int main(void)
                             init_asteroid_shape(Asteroids[i]->shape, asteroidR[Asteroids[i]->radius_index]);
                             INIT_VAO_DYNAMIC_Curva(Asteroids[i]->shape);
                             findBB(Asteroids[i]->shape);
-                            Asteroids[numberOfAsteroids] = init_asteroid(Asteroids[i]->radius_index, numberOfAsteroids);
+                            Asteroids[numberOfAsteroids] = init_asteroid(Asteroids[i]->radius_index);
                             INIT_VAO_DYNAMIC_Curva(Asteroids[numberOfAsteroids]->shape);
                             findBB(Asteroids[numberOfAsteroids]->shape);
                             Asteroids[numberOfAsteroids]->position.x = asteroid_x;
@@ -296,14 +274,14 @@ int main(void)
                             Asteroids[numberOfAsteroids]->direction = original_direction + (float)PI / 6;
                             Asteroids[i]->direction = original_direction - (float)PI / 6;
                             Asteroids[i]->health = 1.0;
-                            //Increse the speed of generated asteroids
+                            //aumenta la velocità dell'asteroide più piccolo
                             Asteroids[numberOfAsteroids]->velocity += 0.05f;
                             Asteroids[i]->velocity = Asteroids[numberOfAsteroids]->velocity;
 
                             numberOfAsteroids++;
                         }
                     }
-
+                    //aggiornamento delle coordinate del singolo asteroide
                     Asteroids[i]->position.x += (Asteroids[i]->velocity * cos(Asteroids[i]->direction));
                     Asteroids[i]->position.y += (Asteroids[i]->velocity * sin(Asteroids[i]->direction));
 
@@ -317,26 +295,31 @@ int main(void)
 
                     Asteroids[i]->shape->Model = rotate(Asteroids[i]->shape->Model, (float)now*(float)0.1, vec3(0.0, 0.0, 1.0));
 
+                    //controllo se un asteroide colpisce il player
                     if (checkCollision(player.shape, Asteroids[i]->shape) && can_collide) {
-                        player.direction += (float)PI / 2;
-                        player.health -= 0.1f;
+                        player.direction += (float)PI / 2; //la direzione del player viene cambiata di 90 gradi
+                        player.health -= 0.1f; //la salute del player viene diminuita
                         if (player.health <= 0) {
                             player.isAlive = false;
                         }
+
+                        //se il player viene colpito da un asteroide mentre è fermo acquisisce velocità
                         if (player.velocity <= 0.1) {
                             player.velocity = 0.2f;
                         }
+                        //se il player viene colpito da un asteroide mentre è in movimento perde velocità
                         else {
                             player.velocity = player.velocity * 0.75f;
                         }
+                        //il player viene renderizzato con colore pieno per visualizzare il danno subito
                         player.shape->render = GL_TRIANGLE_FAN;
                         can_collide = false;
                     }
-
+                    //controllo se un asteroide è stato colpito dal proiettile
                     if (checkCollision(projectile.shape, Asteroids[i]->shape) && shot) {
                         Asteroids[i]->health -= 1.0;
-                        Asteroids[i]->shape->render = GL_TRIANGLE_FAN;
-                        shot = false;
+                        Asteroids[i]->shape->render = GL_TRIANGLE_FAN; //se un asteroide viene colpito viene colorato anche dentro
+                        shot = false; //il proiettile deve smettere di muoversi e tornare al player
                     }
 
                     glUniform4fv(GameColor, 1, value_ptr(vec4(clear_color[0], clear_color[1], clear_color[2], 0.0)));
@@ -350,20 +333,19 @@ int main(void)
 
 
                     Asteroids[i]->shape->render = GL_LINE_LOOP;
-                    pacmanEffect(Asteroids[i], 22.0);
+                    pacmanEffect(Asteroids[i], SCENE_LIMITS + 2.0);
                 }
                 
             }
             
             
-            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // Renders ImGui gui
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // Renderizza la GUI di ImGui
             glfwSwapBuffers(window);
 
-            // only set lastFrameTime when you actually draw something
+            
             lastFrameTime = now;
         }
 
-        // set lastUpdateTime every iteration
         lastUpdateTime = now;
     }
 

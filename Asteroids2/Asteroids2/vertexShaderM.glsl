@@ -12,5 +12,9 @@ void main(){
         gl_Position = Projection * Model * vec4(aPos, 1.0);
         ourColor = GameColor; // set ourColor to the input color we got from the vertex data
     }
+	else if(flagP == 1) {
+		gl_Position = Projection * Model * vec4(aPos, 1.0);
+        ourColor = vec4(1.0, 0.0, 0.0, 1.0);
+	}
 }  
 
